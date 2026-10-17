@@ -89,6 +89,29 @@ func TestInstallRefusesRealCurrentDir(t *testing.T) {
 	}
 }
 
+// TestInstallRequiresRoot confere que, sem -Root, o install.ps1 falha em vez de
+// instalar numa pasta padrão.
+func TestInstallRequiresRoot(t *testing.T) {
+	repo, err := filepath.Abs("..")
+	if err != nil {
+		t.Fatal(err)
+	}
+	cmd := exec.Command("pwsh", "-NoProfile", "-File", filepath.Join(repo, "scripts", "install.ps1"), "-SkipPath")
+	var stderr bytes.Buffer
+	cmd.Stderr = &stderr
+	err = cmd.Run()
+
+	var exitErr *exec.ExitError
+	if !errors.As(err, &exitErr) || exitErr.ExitCode() != 1 {
+		t.Fatalf("erro = %v, quero saída 1", err)
+	}
+	// Só os trechos sem acento: o pwsh redirecionado não escreve em UTF-8.
+	if !strings.HasPrefix(stderr.String(), "Erro: informe a pasta de instala") ||
+		!strings.Contains(stderr.String(), "task install DIR=<pasta>") {
+		t.Errorf("stderr = %q, quero o pedido da pasta", stderr.String())
+	}
+}
+
 // buildExe compila bin/claude-tools.exe, que é de onde o install.ps1 copia, e
 // devolve a raiz do repositório.
 func buildExe(t *testing.T) string {

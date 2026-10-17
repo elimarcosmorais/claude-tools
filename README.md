@@ -24,25 +24,40 @@ ficam em `~/.claude/accounts/`.
 - [Task](https://taskfile.dev)
 - PowerShell 7+ (`pwsh`), usado pelo instalador
 
-## Instalação
+## Build
 
 ```powershell
 git clone https://github.com/elimarcosmorais/claude-tools.git
 cd claude-tools
-task install
+task build
 ```
 
-O `task install` compila `bin/claude-tools.exe` e roda `scripts/install.ps1`, que:
-
-1. copia o executável para `C:\dev\programs\claude-tools\claude-tools-v<VERSION>\`;
-2. aponta a junction `C:\dev\programs\claude-tools\current` para essa versão;
-3. põe `C:\dev\programs\claude-tools\current` no `PATH` do usuário, se ainda não estiver lá.
-
-Rodar de novo dá o mesmo resultado. Para instalar em outra pasta ou sem mexer no `PATH`:
+O `task build` compila o executável em `bin\claude-tools.exe` (o `bin\` fica fora do git). Dá
+para usá-lo direto dali, sem instalar:
 
 ```powershell
-task build
-pwsh -NoProfile -File scripts/install.ps1 -Root D:\tools\claude-tools -SkipPath
+bin\claude-tools.exe help
+```
+
+## Instalação
+
+```powershell
+task install DIR=C:\dev\programs\claude-tools
+```
+
+A pasta de instalação é sua escolha e vem na variável `DIR` (sem ela, o `task install` para com
+a mensagem de uso antes de compilar). Pasta com espaço vai entre aspas:
+`task install "DIR=D:\meus programas\claude-tools"`. O `task install DIR=<pasta>` roda o
+`task build` (não precisa rodá-lo antes) e depois o `scripts/install.ps1`, que:
+
+1. copia o executável para `<pasta>\claude-tools-v<VERSION>\`;
+2. aponta a junction `<pasta>\current` para essa versão;
+3. põe `<pasta>\current` no `PATH` do usuário, se ainda não estiver lá.
+
+Rodar de novo dá o mesmo resultado. Para instalar sem mexer no `PATH`:
+
+```powershell
+task install DIR=D:\tools\claude-tools -- -SkipPath
 ```
 
 Abra um terminal novo depois da instalação para pegar o `PATH` atualizado.

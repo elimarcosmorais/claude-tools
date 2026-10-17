@@ -24,7 +24,14 @@ tasks:
         fi
 
   install:
-    desc: Instala o claude-tools.exe em C:\dev\programs\claude-tools e o põe no PATH do usuário
-    deps: [build]
+    desc: 'Instala o claude-tools.exe na pasta informada e o põe no PATH do usuário (task install DIR=<pasta>)'
+    # A pasta vem na variável DIR: o Task recusa flag que não é dele (--path) e lê
+    # argumento solto como nome de tarefa. A conferência vem antes do build: deps
+    # rodariam antes das preconditions. O default "" é porque, sem DIR, o shellQuote
+    # recebe nil e o Task quebra ao montar os templates, antes da precondition.
+    preconditions:
+      - sh: test -n {{shellQuote (default "" .DIR)}}
+        msg: 'Informe a pasta de instalação: task install DIR=<pasta>  (ex.: task install DIR=C:\dev\programs\claude-tools)'
     cmds:
-      - pwsh -NoProfile -File scripts/install.ps1
+      - task: build
+      - pwsh -NoProfile -File scripts/install.ps1 -Root {{shellQuote (default "" .DIR)}} {{.CLI_ARGS}}

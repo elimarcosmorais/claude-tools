@@ -10,14 +10,15 @@
     Rodar de novo dá o mesmo resultado.
 
 .PARAMETER Root
-    Pasta geral do programa. Padrão: C:\dev\programs\claude-tools.
+    Pasta geral do programa (ex.: C:\dev\programs\claude-tools). Obrigatório: não há
+    pasta padrão.
 
 .PARAMETER SkipPath
     Não mexe no PATH do usuário.
 #>
 [CmdletBinding()]
 param(
-    [string]$Root = 'C:\dev\programs\claude-tools',
+    [string]$Root,
     [switch]$SkipPath
 )
 
@@ -65,6 +66,10 @@ function Add-UserPath([string]$Entry) {
 }
 
 try {
+    # Sem Mandatory de propósito: com ele o pwsh pediria a pasta no console em vez de falhar.
+    if ([string]::IsNullOrWhiteSpace($Root)) {
+        throw 'informe a pasta de instalação: -Root <pasta> (pelo Task: task install DIR=<pasta>).'
+    }
     $repo = Split-Path -Parent $PSScriptRoot
     $version = (Get-Content -LiteralPath (Join-Path $repo 'VERSION') -Raw).Trim()
     if ($version -notmatch '^\d+\.\d+\.\d+$') { throw "VERSION inválida: '$version'." }

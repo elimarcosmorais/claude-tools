@@ -37,17 +37,29 @@ outro ponto: é o que deixa os testes rodarem com `t.TempDir()` como home, sem t
 O `Taskfile.yml` tem `build` (`bin/claude-tools.exe`), `test` (`go test ./...`), `lint`
 (`go vet ./...` e `gofmt -l .` vazio) e `install`. A versão fica no arquivo `VERSION`.
 
-`task install` compila e roda `scripts/install.ps1`, que:
+`task install DIR=<pasta>` compila e roda `scripts/install.ps1 -Root <pasta>`, que:
 
-1. copia `bin/claude-tools.exe` para `C:\dev\programs\claude-tools\claude-tools-v<VERSION>\`;
-2. recria a junction `C:\dev\programs\claude-tools\current` apontando para essa pasta (remove
+1. copia `bin/claude-tools.exe` para `<pasta>\claude-tools-v<VERSION>\`;
+2. recria a junction `<pasta>\current` apontando para essa pasta (remove
    só o link antigo, nunca a pasta para onde ele apontava; se `current` é uma pasta comum, para
    com erro em vez de apagá-la);
-3. põe `C:\dev\programs\claude-tools\current` no `PATH` do usuário, se ainda não estiver lá.
+3. põe `<pasta>\current` no `PATH` do usuário, se ainda não estiver lá.
 
-Rodar de novo dá o mesmo resultado. Os parâmetros `-Root <pasta>` (troca a pasta geral) e
-`-SkipPath` (não mexe no `PATH`) servem para instalar em outro lugar; o teste
-`scripts/install_test.go` usa os dois.
+Não há pasta padrão: o repositório não guarda caminho de instalação. A pasta vem na variável
+`DIR` porque o Task não deixa a tarefa ter flag própria (`task install --path=C:\x` falha com
+`unknown flag: --path`) e lê argumento solto como nome de tarefa (`task install C:\x` falha com
+`Task "C:\x" does not exist`). O nome não é `PATH` para não se confundir com a variável de
+ambiente. O `Taskfile.yml` passa a pasta por `{{shellQuote .DIR}}`: pasta com espaço ou
+terminada em `\` chega inteira ao `pwsh`. O que vier depois do `--` (`{{.CLI_ARGS}}`) vai para
+o `install.ps1`, como o `-SkipPath`.
+
+Sem pasta, a `precondition` do `install` para com a mensagem de uso **antes** do build — por
+isso o build é o comando `task: build`, e não `deps`, que rodaria antes da `precondition`. O
+`install.ps1` chamado direto sem `-Root` também falha (saída 1), sem `Mandatory` para o `pwsh`
+não pedir a pasta no console.
+
+Rodar de novo dá o mesmo resultado. O parâmetro `-SkipPath` não mexe no `PATH`; o teste
+`scripts/install_test.go` usa `-Root` numa pasta temporária com `-SkipPath`.
 
 O `PATH` é lido e gravado direto no registro (`HKCU\Environment`), sem expandir as variáveis e
 mantendo o tipo do valor: `[Environment]::SetEnvironmentVariable` gravaria um `REG_SZ` já
