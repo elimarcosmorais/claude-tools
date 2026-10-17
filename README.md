@@ -27,7 +27,7 @@ ficam em `~/.claude/accounts/`.
 ## Build
 
 ```powershell
-git clone https://github.com/elimarcosmorais/claude-tools.git
+git clone https://github.com/elimarcosmorais/claude-tools-win.git
 cd claude-tools
 task build
 ```

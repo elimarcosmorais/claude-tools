@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/elimarcosmorais/claude-tools/internal/account"
+	"github.com/elimarcosmorais/claude-tools-win/internal/account"
 )
 
 const wantUsage = `Uso: claude-tools account <comando>

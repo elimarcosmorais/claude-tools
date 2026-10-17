@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/elimarcosmorais/claude-tools/internal/cli"
+	"github.com/elimarcosmorais/claude-tools-win/internal/cli"
 )
 
 func main() {
