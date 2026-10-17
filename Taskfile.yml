@@ -1,0 +1,30 @@
+version: '3'
+
+tasks:
+  build:
+    desc: Compila bin/claude-tools.exe
+    cmds:
+      - go build -o bin/claude-tools.exe ./cmd/claude-tools
+
+  test:
+    desc: Roda os testes
+    cmds:
+      - go test ./...
+
+  lint:
+    desc: Roda o go vet e falha se algum arquivo estiver fora do gofmt
+    cmds:
+      - go vet ./...
+      - |
+        unformatted="$(gofmt -l .)"
+        if [ -n "$unformatted" ]; then
+          echo "Arquivos fora do gofmt (rode 'gofmt -w .'):"
+          echo "$unformatted"
+          exit 1
+        fi
+
+  install:
+    desc: Instala o claude-tools.exe em C:\dev\programs\claude-tools e o põe no PATH do usuário
+    deps: [build]
+    cmds:
+      - pwsh -NoProfile -File scripts/install.ps1
