@@ -4,7 +4,7 @@
     Instala o claude-tools.exe na pasta de programas e o põe no PATH do usuário.
 
 .DESCRIPTION
-    Copia bin\claude-tools.exe (gerado por 'task build') para
+    Copia bin\claude-tools.exe (gerado por 'go tool task build') para
     <Root>\claude-tools-v<VERSION>\, recria a junction <Root>\current apontando para
     essa pasta e acrescenta <Root>\current ao PATH do usuário, se ainda não estiver lá.
     Rodar de novo dá o mesmo resultado.
@@ -68,13 +68,13 @@ function Add-UserPath([string]$Entry) {
 try {
     # Sem Mandatory de propósito: com ele o pwsh pediria a pasta no console em vez de falhar.
     if ([string]::IsNullOrWhiteSpace($Root)) {
-        throw 'informe a pasta de instalação: -Root <pasta> (pelo Task: task install DIR=<pasta>).'
+        throw 'informe a pasta de instalação: -Root <pasta> (pelo Task: go tool task install DIR=<pasta>).'
     }
     $repo = Split-Path -Parent $PSScriptRoot
     $version = (Get-Content -LiteralPath (Join-Path $repo 'VERSION') -Raw).Trim()
     if ($version -notmatch '^\d+\.\d+\.\d+$') { throw "VERSION inválida: '$version'." }
     $exe = Join-Path $repo 'bin\claude-tools.exe'
-    if (-not (Test-Path -LiteralPath $exe -PathType Leaf)) { throw "Não achei $exe. Rode 'task build' antes." }
+    if (-not (Test-Path -LiteralPath $exe -PathType Leaf)) { throw "Não achei $exe. Rode 'go tool task build' antes." }
 
     $Root = [IO.Path]::GetFullPath($Root)
     $versionDir = Join-Path $Root "claude-tools-v$version"

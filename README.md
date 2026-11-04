@@ -21,18 +21,18 @@ ficam em `~/.claude/accounts/`.
 
 - Windows
 - [Go](https://go.dev) 1.27+
-- [Task](https://taskfile.dev)
 - PowerShell 7+ (`pwsh`), usado pelo instalador
 
 ## Build
 
 ```powershell
-git clone https://github.com/elimarcosmorais/claude-tools-win.git
+git clone https://github.com/elimarcosmorais/claude-tools.git
 cd claude-tools
-task build
+go tool task build
 ```
 
-O `task build` compila o executável em `bin\claude-tools.exe` (o `bin\` fica fora do git). Dá
+O [Task](https://taskfile.dev) não precisa estar instalado: ele é uma ferramenta do `go.mod` e roda
+por `go tool task` (o Go o compila na primeira vez). O `go tool task build` compila o executável em `bin\claude-tools.exe` (o `bin\` fica fora do git). Dá
 para usá-lo direto dali, sem instalar:
 
 ```powershell
@@ -42,13 +42,13 @@ bin\claude-tools.exe help
 ## Instalação
 
 ```powershell
-task install DIR=C:\dev\programs\claude-tools
+go tool task install DIR=C:\dev\programs\claude-tools
 ```
 
-A pasta de instalação é sua escolha e vem na variável `DIR` (sem ela, o `task install` para com
+A pasta de instalação é sua escolha e vem na variável `DIR` (sem ela, o `go tool task install` para com
 a mensagem de uso antes de compilar). Pasta com espaço vai entre aspas:
-`task install "DIR=D:\meus programas\claude-tools"`. O `task install DIR=<pasta>` roda o
-`task build` (não precisa rodá-lo antes) e depois o `scripts/install.ps1`, que:
+`go tool task install "DIR=D:\meus programas\claude-tools"`. O `go tool task install DIR=<pasta>` roda o
+`build` (não precisa rodá-lo antes) e depois o `scripts/install.ps1`, que:
 
 1. copia o executável para `<pasta>\claude-tools-v<VERSION>\`;
 2. aponta a junction `<pasta>\current` para essa versão;
@@ -57,7 +57,7 @@ a mensagem de uso antes de compilar). Pasta com espaço vai entre aspas:
 Rodar de novo dá o mesmo resultado. Para instalar sem mexer no `PATH`:
 
 ```powershell
-task install DIR=D:\tools\claude-tools -- -SkipPath
+go tool task install DIR=D:\tools\claude-tools -- -SkipPath
 ```
 
 Abra um terminal novo depois da instalação para pegar o `PATH` atualizado.
@@ -96,14 +96,14 @@ da variável e ignora o login: `use` e `status` avisam, porque a troca não ter�
 
 ## Comandos
 
-| Comando | Descrição |
-|---|---|
-| `claude-tools account save <conta>` | guarda o login atual do Claude Code como `<conta>` |
-| `claude-tools account use <conta>` | ativa o login guardado em `<conta>` |
-| `claude-tools account rename <conta> <nova>` | renomeia `<conta>` para `<nova>` |
-| `claude-tools account remove <conta>` | apaga o login guardado em `<conta>` (sem pedir confirmação) |
-| `claude-tools account status` | mostra a conta ativa e as contas salvas |
-| `claude-tools help` | mostra o uso |
+| Comando                                      | Descrição                                                   |
+| -------------------------------------------- | ----------------------------------------------------------- |
+| `claude-tools account save <conta>`          | guarda o login atual do Claude Code como `<conta>`          |
+| `claude-tools account use <conta>`           | ativa o login guardado em `<conta>`                         |
+| `claude-tools account rename <conta> <nova>` | renomeia `<conta>` para `<nova>`                            |
+| `claude-tools account remove <conta>`        | apaga o login guardado em `<conta>` (sem pedir confirmação) |
+| `claude-tools account status`                | mostra a conta ativa e as contas salvas                     |
+| `claude-tools help`                          | mostra o uso                                                |
 
 Nome de conta: letras, números, `-` ou `_`, até 32 caracteres, gravado em minúsculas; `backup` é
 reservado. Códigos de saída: `0` sucesso, `1` erro, `2` uso incorreto.
@@ -111,6 +111,6 @@ reservado. Códigos de saída: `0` sucesso, `1` erro, `2` uso incorreto.
 ## Testes
 
 ```powershell
-task test   # go test ./...
-task lint   # go vet ./... e gofmt
+go tool task test   # go test ./...
+go tool task lint   # go vet ./... e gofmt
 ```

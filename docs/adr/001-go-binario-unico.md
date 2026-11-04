@@ -28,7 +28,8 @@ padrão, compilado num executável único `claude-tools.exe` (`go build ./cmd/cl
 - Um `.exe` só, sem runtime nem dependência para instalar: copiar o arquivo basta.
 - Abre rápido e tem tamanho pequeno.
 - Teste, formatação e análise estática já vêm com o toolchain (`go test`, `gofmt`, `go vet`).
-- Sem módulos de terceiros, não há dependência para atualizar nem auditar.
+- Sem módulos de terceiros no código, não há dependência para atualizar nem auditar. (O `go.mod`
+  tem a diretiva `tool` do Task, só para o desenvolvimento: [ADR 002](002-task-como-ferramenta-do-go-mod.md).)
 
 **Custos:**
 
@@ -40,7 +41,7 @@ padrão, compilado num executável único `claude-tools.exe` (`go build ./cmd/cl
 
 **Neutras:**
 
-- O build e a instalação ficam num `Taskfile.yml` (`task build`, `test`, `lint`, `install`).
+- O build e a instalação ficam num `Taskfile.yml` (`go tool task build`, `test`, `lint`, `install`).
 
 ## Alternativas consideradas
 

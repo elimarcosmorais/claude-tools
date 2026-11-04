@@ -35,9 +35,11 @@ outro ponto: é o que deixa os testes rodarem com `t.TempDir()` como home, sem t
 ## Build e instalação
 
 O `Taskfile.yml` tem `build` (`bin/claude-tools.exe`), `test` (`go test ./...`), `lint`
-(`go vet ./...` e `gofmt -l .` vazio) e `install`. A versão fica no arquivo `VERSION`.
+(`go vet ./...` e `gofmt -l .` vazio) e `install`. A versão fica no arquivo `VERSION`. O Task é uma
+diretiva `tool` do `go.mod` e roda por `go tool task <tarefa>`, sem instalação na máquina
+([ADR 002](adr/002-task-como-ferramenta-do-go-mod.md)).
 
-`task install DIR=<pasta>` compila e roda `scripts/install.ps1 -Root <pasta>`, que:
+`go tool task install DIR=<pasta>` compila e roda `scripts/install.ps1 -Root <pasta>`, que:
 
 1. copia `bin/claude-tools.exe` para `<pasta>\claude-tools-v<VERSION>\`;
 2. recria a junction `<pasta>\current` apontando para essa pasta (remove
@@ -46,15 +48,15 @@ O `Taskfile.yml` tem `build` (`bin/claude-tools.exe`), `test` (`go test ./...`),
 3. põe `<pasta>\current` no `PATH` do usuário, se ainda não estiver lá.
 
 Não há pasta padrão: o repositório não guarda caminho de instalação. A pasta vem na variável
-`DIR` porque o Task não deixa a tarefa ter flag própria (`task install --path=C:\x` falha com
-`unknown flag: --path`) e lê argumento solto como nome de tarefa (`task install C:\x` falha com
+`DIR` porque o Task não deixa a tarefa ter flag própria (`go tool task install --path=C:\x` falha com
+`unknown flag: --path`) e lê argumento solto como nome de tarefa (`go tool task install C:\x` falha com
 `Task "C:\x" does not exist`). O nome não é `PATH` para não se confundir com a variável de
 ambiente. O `Taskfile.yml` passa a pasta por `{{shellQuote .DIR}}`: pasta com espaço ou
 terminada em `\` chega inteira ao `pwsh`. O que vier depois do `--` (`{{.CLI_ARGS}}`) vai para
 o `install.ps1`, como o `-SkipPath`.
 
 Sem pasta, a `precondition` do `install` para com a mensagem de uso **antes** do build — por
-isso o build é o comando `task: build`, e não `deps`, que rodaria antes da `precondition`. O
+isso o build é o comando `task: build` (dentro do Taskfile), e não `deps`, que rodaria antes da `precondition`. O
 `install.ps1` chamado direto sem `-Root` também falha (saída 1), sem `Mandatory` para o `pwsh`
 não pedir a pasta no console.
 

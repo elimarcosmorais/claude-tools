@@ -9,7 +9,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/elimarcosmorais/claude-tools-win/internal/account"
+	"github.com/elimarcosmorais/claude-tools/internal/account"
 )
 
 const usage = `Uso: claude-tools account <comando>

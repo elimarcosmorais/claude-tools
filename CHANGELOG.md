@@ -16,4 +16,4 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/), e
 
 - **account:** implementa o CLI de troca de contas do Claude Code (ac54bde)
 
-[0.1.0]: https://github.com/elimarcosmorais/claude-tools-win/releases/tag/v0.1.0
+[0.1.0]: https://github.com/elimarcosmorais/claude-tools/releases/tag/v0.1.0

@@ -3,18 +3,18 @@
 ## Visão do projeto
 CLI de Windows (`claude-tools.exe`) que guarda logins do Claude Code com um nome e troca entre
 eles copiando arquivos em `~/.claude`; sem rede, banco nem serviço. Uso pessoal, instalado na
-pasta passada ao `task install` (sem pasta padrão).
+pasta passada ao `go tool task install` (sem pasta padrão).
 
 ## Stack
-- Go 1.27 (`go.mod`), só a biblioteca padrão: um executável único ([ADR 001](docs/adr/001-go-binario-unico.md)).
-- Build, testes e instalação pelo [Task](https://taskfile.dev) (`Taskfile.yml`); versão no arquivo `VERSION`.
-- NÃO usar: módulo de terceiros (o `go.mod` não tem `require`); mudar isso exige ADR nova.
+- Go 1.27 (`go.mod`), só a biblioteca padrão no código: um executável único ([ADR 001](docs/adr/001-go-binario-unico.md)).
+- Build, testes e instalação pelo [Task](https://taskfile.dev) (`Taskfile.yml`), que é diretiva `tool` do `go.mod` e roda por `go tool task`, sem instalar nada na máquina ([ADR 002](docs/adr/002-task-como-ferramenta-do-go-mod.md)); versão no arquivo `VERSION`.
+- NÃO usar: módulo de terceiros no código do `claude-tools` (o `go.mod` só tem as dependências `// indirect` da diretiva `tool` do Task); mudar isso exige ADR nova.
 
 ## Comandos
-- Build: `task build` (gera `bin/claude-tools.exe`)
-- Testes: `task test` (`go test ./...`)
-- Lint: `task lint` (`go vet ./...` e falha se `gofmt -l .` listar algum arquivo)
-- Instalar: `task install DIR=<pasta>` (build + `scripts/install.ps1 -Root <pasta>`: cópia versionada, junction `current` e `PATH` do usuário)
+- Build: `go tool task build` (gera `bin/claude-tools.exe`)
+- Testes: `go tool task test` (`go test ./...`)
+- Lint: `go tool task lint` (`go vet ./...` e falha se `gofmt -l .` listar algum arquivo)
+- Instalar: `go tool task install DIR=<pasta>` (build + `scripts/install.ps1 -Root <pasta>`: cópia versionada, junction `current` e `PATH` do usuário)
 
 ## Convenções
 - A home do usuário só é lida em `cmd/claude-tools/main.go`; `cli.Run` e `account.Store` a
@@ -40,4 +40,4 @@ pasta passada ao `task install` (sem pasta padrão).
   [docs/adr/README.md](docs/adr/README.md).
 
 ## Pronto significa
-- `task test` e `task lint` verdes, e `task build` compilando.
+- `go tool task test` e `go tool task lint` verdes, e `go tool task build` compilando.
