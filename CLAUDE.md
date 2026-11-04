@@ -11,7 +11,8 @@ pasta passada ao `go tool task install` (sem pasta padrão).
 - NÃO usar: módulo de terceiros no código do `claude-tools` (o `go.mod` só tem as dependências `// indirect` da diretiva `tool` do Task); mudar isso exige ADR nova.
 
 ## Comandos
-- Build: `go tool task build` (gera `bin/claude-tools.exe`)
+- Build: `go tool task build` (gera `bin/claude-tools-<VERSION>.exe`, com a versão do arquivo `VERSION`)
+- Release: versão em `VERSION` · anexos: `go tool task build` → `bin/claude-tools-<versão>.exe`
 - Testes: `go tool task test` (`go test ./...`)
 - Lint: `go tool task lint` (`go vet ./...` e falha se `gofmt -l .` listar algum arquivo)
 - Instalar: `go tool task install DIR=<pasta>` (build + `scripts/install.ps1 -Root <pasta>`: cópia versionada, junction `current` e `PATH` do usuário)

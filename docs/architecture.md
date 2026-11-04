@@ -34,14 +34,14 @@ outro ponto: é o que deixa os testes rodarem com `t.TempDir()` como home, sem t
 
 ## Build e instalação
 
-O `Taskfile.yml` tem `build` (`bin/claude-tools.exe`), `test` (`go test ./...`), `lint`
+O `Taskfile.yml` tem `build` (`bin/claude-tools-<VERSION>.exe`), `test` (`go test ./...`), `lint`
 (`go vet ./...` e `gofmt -l .` vazio) e `install`. A versão fica no arquivo `VERSION`. O Task é uma
 diretiva `tool` do `go.mod` e roda por `go tool task <tarefa>`, sem instalação na máquina
 ([ADR 002](adr/002-task-como-ferramenta-do-go-mod.md)).
 
 `go tool task install DIR=<pasta>` compila e roda `scripts/install.ps1 -Root <pasta>`, que:
 
-1. copia `bin/claude-tools.exe` para `<pasta>\claude-tools-v<VERSION>\`;
+1. copia `bin/claude-tools-<VERSION>.exe` para `<pasta>\claude-tools-v<VERSION>\claude-tools.exe`;
 2. recria a junction `<pasta>\current` apontando para essa pasta (remove
    só o link antigo, nunca a pasta para onde ele apontava; se `current` é uma pasta comum, para
    com erro em vez de apagá-la);

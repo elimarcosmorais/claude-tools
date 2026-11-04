@@ -112,15 +112,15 @@ func TestInstallRequiresRoot(t *testing.T) {
 	}
 }
 
-// buildExe compila bin/claude-tools.exe, que é de onde o install.ps1 copia, e
-// devolve a raiz do repositório.
+// buildExe compila bin/claude-tools-<VERSION>.exe, que é de onde o install.ps1
+// copia, e devolve a raiz do repositório.
 func buildExe(t *testing.T) string {
 	t.Helper()
 	repo, err := filepath.Abs("..")
 	if err != nil {
 		t.Fatal(err)
 	}
-	cmd := exec.Command("go", "build", "-o", filepath.Join("bin", "claude-tools.exe"), "./cmd/claude-tools")
+	cmd := exec.Command("go", "build", "-o", filepath.Join("bin", "claude-tools-"+readVersion(t, repo)+".exe"), "./cmd/claude-tools")
 	cmd.Dir = repo
 	if out, err := cmd.CombinedOutput(); err != nil {
 		t.Fatalf("go build: %v\n%s", err, out)

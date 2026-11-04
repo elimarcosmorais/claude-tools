@@ -1,10 +1,15 @@
 version: '3'
 
+vars:
+  # A versão vem do arquivo VERSION (única fonte) e entra no nome do executável.
+  VERSION:
+    sh: pwsh -NoProfile -Command "(Get-Content -LiteralPath VERSION -Raw).Trim()"
+
 tasks:
   build:
-    desc: Compila bin/claude-tools.exe
+    desc: 'Compila bin/claude-tools-<VERSION>.exe (ex.: bin/claude-tools-0.1.0.exe)'
     cmds:
-      - go build -o bin/claude-tools.exe ./cmd/claude-tools
+      - go build -o bin/claude-tools-{{.VERSION}}.exe ./cmd/claude-tools
 
   test:
     desc: Roda os testes

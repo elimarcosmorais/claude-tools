@@ -32,11 +32,11 @@ go tool task build
 ```
 
 O [Task](https://taskfile.dev) não precisa estar instalado: ele é uma ferramenta do `go.mod` e roda
-por `go tool task` (o Go o compila na primeira vez). O `go tool task build` compila o executável em `bin\claude-tools.exe` (o `bin\` fica fora do git). Dá
+por `go tool task` (o Go o compila na primeira vez). O `go tool task build` compila o executável em `bin\claude-tools-<VERSION>.exe`, com a versão do arquivo `VERSION` no nome (o `bin\` fica fora do git). Dá
 para usá-lo direto dali, sem instalar:
 
 ```powershell
-bin\claude-tools.exe help
+bin\claude-tools-0.1.0.exe help
 ```
 
 ## Instalação
