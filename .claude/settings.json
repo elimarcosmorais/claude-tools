@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "ask": [
+      "PowerShell(*RunAs*)",
+      "Bash(*RunAs*)",
+      "Bash(*runas*)",
+      "Bash(*Runas*)",
+      "Bash(*RUNAS*)"
+    ]
+  }
+}

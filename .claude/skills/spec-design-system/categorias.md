@@ -50,6 +50,8 @@ dizendo o que ele cobre; depois, só as tabelas e campos da categoria. Toda linh
 
 - **Densidade:** <!-- LLM-ONLY: ex.: confortável; compacta só em tabelas -->
 - **Estrutura das telas:** <!-- LLM-ONLY: ex.: barra lateral + conteúdo com largura máxima de 1200px -->
+- **Barra de rolagem:** <!-- LLM-ONLY: nativa do sistema, ou personalizada com largura e as cores da barra e do trilho por tema -->
+
 
 ### `tema.md`
 
@@ -102,6 +104,21 @@ Nasce quando a família não cabe numa linha de `componentes.md`: variantes, tam
 
 | Variante | Referência (import) | Quando usar | Origem |
 |----------|---------------------|-------------|--------|
+
+### `formularios.md`
+
+Nasce quando o produto tem campo de texto: tamanhos, estados e anatomia dos campos, que toda
+tela com formulário segue.
+
+| Tamanho | Altura / Padding horizontal / Texto | Origem |
+|---------|-------------------------------------|--------|
+
+| Estado | Borda / Fundo / Texto / Outro | Origem |
+|--------|-------------------------------|--------|
+
+- **Anatomia:** <!-- LLM-ONLY: posição do rótulo, marcação de obrigatório, texto de ajuda, mensagem de erro, contador -->
+- **Placeholder:** <!-- LLM-ONLY: cor e regra de uso -->
+- **Quando o erro aparece:**
 
 ### `camadas-sobreposicoes.md`
 

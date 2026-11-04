@@ -118,12 +118,14 @@ e faça no máximo **2 rodadas**. Se o usuário já decidiu algo, não pergunte 
 
 ### 4b. Substituição (a decisão nova contradiz uma ADR `aceito`)
 
-1. Confirme com o usuário que a ADR antiga deve ser substituída.
-2. Crie a ADR nova como em 4a, preenchendo **Substitui:** com a antiga e citando nas
+Substituir não pede confirmação: a decisão nova é a que o usuário trouxe, e o resumo mostra
+qual ADR ela substituiu.
+
+1. Crie a ADR nova como em 4a, preenchendo **Substitui:** com a antiga e citando nas
    Alternativas a decisão antiga e o motivo da troca.
-3. Na ADR antiga, mude **só**: `status: substituído` e **Substituída por:** com a nova. O resto
+2. Na ADR antiga, mude **só**: `status: substituído` e **Substituída por:** com a nova. O resto
    fica como está: é o histórico.
-4. **Índice:** tire a linha da antiga. A nova entrou no passo 2.
+3. **Índice:** tire a linha da antiga. A nova entrou no passo 1.
 
 ## Etapa 5 — Atualizar a origem
 

@@ -94,7 +94,8 @@ integridade alta.
 
 Então **não existe** "o agente clica em Sim". Comando que precisa de admin segue a regra 5 do
 `behavior.md`: eleve só aquele comando, avise antes no chat, e trate "não autorizado" (recusa ou
-expiração do diálogo, ~2 min) como passo não executado, sem prova.
+expiração do diálogo, ~2 min) como passo não executado, sem prova. Quem chama o usuário a tempo
+é a regra `ask` do `.claude/settings.json`, que segura o comando com `RunAs` até ele aprovar.
 
 ## Só quando o controle de input está ligado
 

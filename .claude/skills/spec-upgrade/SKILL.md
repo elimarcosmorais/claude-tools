@@ -1,6 +1,6 @@
 ---
 name: spec-upgrade
-description: Utilitário do framework (transversal). Atualiza as skills, os agents e as rules do SpecFlow num projeto que já o usa, a partir da versão mais nova do repositório público no GitHub (ou de uma tag, branch ou commit) - baixa o repositório numa pasta temporária, classifica cada arquivo de .claude/ pelo histórico do framework (novo, desatualizado, personalizado no projeto, removido do framework, do próprio projeto), copia direto o que é novo ou desatualizado, pergunta antes de sobrescrever arquivo personalizado e de apagar o que saiu do framework, e nunca toca no que é do projeto (skills, agents e rules próprios, settings, CLAUDE.md, README, docs/). Não commita. Usar quando o usuário pedir para atualizar o SpecFlow, as skills, os agents ou as rules do framework no projeto, ou trazer a versão nova do framework. Não serve para atualizar as specs (docs/specs/), que o agente mantém sozinho, nem para rodar no próprio repositório do SpecFlow.
+description: Utilitário do framework (transversal). Atualiza as skills, os agents e as rules do SpecFlow num projeto que já o usa, a partir da versão mais nova do repositório público no GitHub (ou de uma tag, branch ou commit) - baixa o repositório numa pasta temporária, classifica cada arquivo de .claude/ pelo histórico do framework (novo, desatualizado, personalizado no projeto, removido do framework, do próprio projeto), copia direto o que é novo ou desatualizado, pergunta antes de sobrescrever arquivo personalizado e de apagar o que saiu do framework, junta no .claude/settings.json do projeto as regras de permissão do framework que faltam (só acrescenta), e nunca toca no resto do que é do projeto (skills, agents e rules próprios, settings.local.json, CLAUDE.md, README, docs/). Não commita. Usar quando o usuário pedir para atualizar o SpecFlow, as skills, os agents ou as rules do framework no projeto, ou trazer a versão nova do framework. Não serve para atualizar as specs (docs/specs/), que o agente mantém sozinho, nem para rodar no próprio repositório do SpecFlow.
 argument-hint: "[tag, branch ou commit do SpecFlow (opcional; padrão: a branch principal)]"
 disable-model-invocation: true
 ---
@@ -24,7 +24,9 @@ framework, e mostrar o que mudou. O commit fica com o usuário (`/spec-semantic-
    chamaram `agent-spec-*`, e um projeto com a versão antiga ficaria com as duas cópias. Quem
    classifica é o [`classificar.sh`](classificar.sh); não classifique de cabeça.
 2. **Do projeto, nunca toque.** Skill, agent ou rule que nunca existiu no framework (`do-projeto`),
-   `settings*.json`, `CLAUDE.md`, `README.md` e `docs/` ficam como estão.
+   `settings.local.json`, `CLAUDE.md`, `README.md` e `docs/` ficam como estão. O
+   `.claude/settings.json` é do projeto e só **recebe** as regras de permissão do framework que
+   faltam nele (Etapa 5): nada nele se sobrescreve nem sai.
 3. **Novo e desatualizado: aplique sem perguntar.** Desatualizado é idêntico a uma versão antiga
    do framework, então ninguém o editou e nada se perde. Rodar a skill é a autorização.
 4. **Personalizado e removido: pergunte antes** (regra 4 de `behavior.md`). Personalizado foi
@@ -94,8 +96,10 @@ Cada linha é `<situação> <caminho>`:
 | `removido-personalizado` | saiu do framework, mas foi editado no projeto | perguntar (Etapa 4) |
 | `do-projeto` | nunca foi do framework | nada (Regra 2) |
 
-Sem `.claude/` no projeto, tudo sai `novo`: é uma instalação, e segue igual. Tudo `igual` →
-diga que o projeto já está na versão nova, rode `rm -rf /tmp/specflow-upgrade` e pare.
+Sem `.claude/` no projeto, tudo sai `novo`: é uma instalação, e segue igual. O
+`.claude/settings.json` não entra na lista (Regra 2). Tudo `igual` → faça só a parte
+**Permissões** da Etapa 5, rode `rm -rf /tmp/specflow-upgrade` e pare: diga que o projeto já
+está na versão nova e se alguma regra de permissão entrou.
 
 O próprio `spec-upgrade` entra na lista como qualquer outra skill. A versão nova dele vale a
 partir da próxima execução.
@@ -134,6 +138,19 @@ Escreva a pasta do `mkdir -p` por extenso (ex.: `.claude/skills/spec-adr`), não
 Depois de apagar, remova as pastas que ficaram vazias, só nas pastas do framework
 (`find .claude/skills .claude/agents .claude/rules -type d -empty -delete`).
 
+**Permissões.** O `/tmp/specflow-upgrade/.claude/settings.json` traz as regras `permissions.ask`
+de que as rules do framework dependem (ex.: a que segura o comando que abre o UAC, regra 5 de
+`behavior.md`). Leia-o e leia o `.claude/settings.json` do projeto, e junte pelo Read/Edit/Write
+(`behavior.md`, regra 6), sem perguntar: acrescentar uma regra que só segura comando não perde
+edição nenhuma (Regra 3).
+
+- Projeto sem o arquivo → copie o do framework.
+- Com o arquivo → acrescente em `permissions.ask` cada regra do framework que não está lá, sem
+  mexer no resto (outras chaves, `allow`, `deny`, ordem, formatação). Regra que o framework
+  deixou de ter fica: só acrescente.
+- O do projeto não é JSON válido → não mexa, e diga a linha do erro no relatório: o Claude Code
+  também não o carrega.
+
 Confira: rode o `classificar.sh` de novo, antes de apagar o clone. Só podem sobrar `igual`,
 `do-projeto` e o que o usuário mandou manter. Sobrou outra coisa → diga qual e por quê.
 
@@ -150,6 +167,7 @@ Novos: <caminhos> | nenhum
 Atualizados: <caminhos> | nenhum
 Personalizados: <caminho> → mesclado | substituído | mantido
 Apagados: <caminhos> | nenhum · Mantidos a pedido: <caminhos>
+Permissões: <regras acrescentadas ao .claude/settings.json> | já estavam
 Do projeto, intocados: <caminhos> | nenhum
 Sem commit: confira com `git diff -- .claude` e rode /spec-semantic-commit
 ```

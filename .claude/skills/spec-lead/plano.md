@@ -35,12 +35,14 @@ nenhum passo, e o relatório o recolhe para o usuário. Só o que muda entra. --
 |---|---|---|
 | <o que precisou ser decidido> | <o que foi escolhido> | <motivo em 1 linha; alternativa descartada> |
 
-**ADR a registrar:** <título> | nenhuma
+**ADR a registrar:** <título> (substitui NNN) | nenhuma
 
 <!-- LLM-ONLY: só decisão não óbvia — a que o usuário respondeu, ou a que o lead tomou e foge do
 padrão do código. O que o código, uma spec ou uma ADR já respondem não entra. ADR só para
 decisão que vale para o projeto todo; o executor a registra no primeiro passo que depende dela
-(Arquivos: `docs/adr/NNN-<titulo>.md` e `docs/adr/README.md`). -->
+(Arquivos: `docs/adr/NNN-<titulo>.md` e `docs/adr/README.md`). "(substitui NNN)" só quando a
+decisão vai contra uma ADR `aceito`. ADR que o passo só deixa desatualizada não entra aqui: o
+executor a atualiza sozinho (rule `docs.md`). -->
 
 ## 4. Telas
 
@@ -60,9 +62,9 @@ desfaz cada uma, ou "irreversível: <plano>").>
   funções>
 - **Arquivos:** `<caminho>` (novo) · `<caminho>` (modifica) · `docs/specs/<assunto>.md` (modifica)
 - **Pronto quando:**
-  - [ ] <teste: entrada → resultado concreto> (CA-1)
+  - [ ] <teste: entrada → resultado concreto> (CA-1) · `<comando que roda só este teste>`
   - [ ] `docs/specs/<assunto>.md` descreve <o comportamento novo>
-  - [ ] `<comando de testes e build do projeto>` sem erros
+  - [ ] fechamento, uma vez no fim do passo: `<suíte, build e lint do projeto>` sem erros nem pulados
 
 ### Passo 2 — <nome>
 
@@ -75,7 +77,9 @@ desfaz cada uma, ou "irreversível: <plano>").>
 <!-- LLM-ONLY: passos na ordem de execução; cada um entregável e testável sozinho, numa passada.
 "Arquivos" é onde o passo deve mexer, não uma cerca: o que ele precisar a mais para funcionar
 (chamador, teste, config) o executor toca e diz. "Pronto quando" só tem o que um agente prova —
-teste com resultado concreto, comando, trecho da spec; nunca "funciona". Todo CA que não é
+teste com resultado concreto, comando, trecho da spec; nunca "funciona". Cada item de teste leva
+o comando que roda SÓ ele: é com ele que o executor itera e que o lead confere. A suíte, o build
+e o lint ficam num item só de fechamento, que o executor roda uma vez, no fim do passo. Todo CA que não é
 "(manual: …)" aparece em algum "Pronto quando", e toda spec afetada é atualizada pelo passo que
 muda aquele comportamento. "Risco: alto" só no passo que toca autenticação, autorização,
 pagamentos, segredos ou dados pessoais: com ele, a revisão final aplica o checklist de

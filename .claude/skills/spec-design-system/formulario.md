@@ -171,8 +171,8 @@ tem o assunto; `(só projeto existente)`, só quando já há interface implement
 - **Estratégia de elevação** (obrigatório): sombra · borda em vez de sombra · fundo diferente ·
   nenhuma
 - **Níveis de sombra:** <nível — valor — para quê>
-- **Padding padrão por elemento:** botão `<valor>` · campo `<valor>` · card `<valor>` · célula de
-  tabela `<valor>` · container da página `<valor>`
+- **Padding padrão por elemento:** botão `<valor>` · card `<valor>` · célula de tabela
+  `<valor>` · container da página `<valor>` (o do campo fica em Campos de formulário, seção 9)
 - **Espaço vertical entre blocos:** <ex.: 24px entre seções, 8px entre rótulo e campo>
 - **Notas:**
 
@@ -215,6 +215,8 @@ tem o assunto; `(só projeto existente)`, só quando já há interface implement
 - **Rolagem:** página inteira · só a área de conteúdo
 - **Tamanho mínimo de janela (desktop) ou safe area (mobile):**
 - **Zoom ou escala do SO suportada:** <ex.: até 200% sem quebra>
+- **Barra de rolagem:** nativa do sistema · personalizada — se personalizada: largura `<valor>` ·
+  cor da barra e do trilho por tema `<tokens>` · aparece <sempre · só ao rolar>
 - **Notas:**
 
 ## 8. Tema → `docs/design/tema.md`
@@ -291,6 +293,34 @@ tem o assunto; `(só projeto existente)`, só quando já há interface implement
   desabilitado · carregando · erro · selecionado — marque os que o produto usa:
 - **O que NÃO deve virar componente próprio:** <ex.: layout de uma tela, wrapper de uma só
   chamada>
+- **Notas:**
+
+### Campos de formulário → `docs/design/formularios.md`
+
+Preencha quando o inventário marca `campo de texto` como `sim`; senão, `[—]` no bloco inteiro.
+
+- **Tamanhos** (obrigatório):
+
+| Tamanho | Altura | Padding horizontal | Tamanho do texto |
+|---|---|---|---|
+| (exemplo) médio | 40px | 12px | 16px |
+
+- **Estados** (obrigatório — token ou valor em cada célula; `[—]` onde o estado não muda aquilo):
+
+| Estado | Borda | Fundo | Texto | Outro (sombra, contorno, ícone) |
+|---|---|---|---|---|
+| padrão | | | | |
+| hover | | | | |
+| foco | | | | |
+| erro | | | | |
+| desabilitado | | | | |
+| somente leitura | | | | |
+
+- **Anatomia** (obrigatório): rótulo <acima · ao lado · flutuante> · obrigatório marcado
+  <asterisco · "(opcional)" nos opcionais> · texto de ajuda <onde> · mensagem de erro <onde, com
+  ícone?> · contador de caracteres <sim/não>
+- **Placeholder:** cor `<token>` · regra de uso <ex.: nunca no lugar do rótulo>
+- **Quando o erro aparece:** ao sair do campo · ao enviar · ao digitar
 - **Notas:**
 
 ## 10. Padrões de feedback → `docs/design/padroes-feedback.md`

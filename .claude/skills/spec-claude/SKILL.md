@@ -92,6 +92,16 @@ mostrar ao usuário de onde veio cada regra (Etapa 6). Olhe por três ângulos:
 - **Configuração** (fatos mais firmes): linguagem e versão, framework e libs principais
   (manifest), gerenciador de pacotes (lockfile), comandos de install/dev/build/lint/test
   (scripts, `Makefile`, CI), variáveis de ambiente (`.env.example`).
+  **Integração fora da suíte padrão** (build tag `integration`, `vitest.integration.config.*`,
+  script `test:integration`, grupo do PHPUnit) → linha `Integração:` com o comando inteiro e,
+  quando o ecossistema sabe achar os testes afetados, o comando por impacto e o critério:
+  - Go: `` por impacto: `go test -tags=integration <alvos>` · alvos: os pacotes cujo `go list -tags=integration -test -deps` inclui o pacote de um arquivo alterado ``;
+  - Jest: `` por impacto: `npx jest -c <config> --findRelatedTests <alvos>` · alvos: os arquivos alterados ``.
+
+  O comando por impacto precisa do mesmo ambiente do inteiro: se a task da integração exporta
+  variáveis ou sobe serviços, ele passa por ela, com os alvos como argumento; sem isso, os testes
+  pulam. A task não aceita alvos, ou não há como achá-los → a linha fica só com o comando
+  inteiro, e a revisão a roda inteira.
 - **Estrutura:** layout de pastas e 1 ou 2 arquivos exemplares por camada → onde cada tipo de
   arquivo nasce, convenções de organização, código gerado que não se edita à mão. Tem interface
   (componentes, CSS, tokens, janelas)? → habilita as seções UI e Teste visual: procure a

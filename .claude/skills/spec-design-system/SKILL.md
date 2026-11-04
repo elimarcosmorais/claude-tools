@@ -1,7 +1,7 @@
 ---
 name: spec-design-system
-description: Utilitário do framework (obrigatório em projeto com interface visual). Cria ou atualiza o design system do produto - docs/design-system.md (contexto geral e índice) e um arquivo por categoria em docs/design/ (cores, tipografia, espaçamento, ícones, layout, tema, componentes, padrões de feedback, acessibilidade visual e, sob demanda, botões, camadas, movimento e divergências). Deriva do código, do Figma e dos documentos do time tudo o que já existe e só pergunta o resto. Em projeto novo, parte da proposta do produto, tira as dúvidas de direção e entrega um formulário técnico de especificação, pré-preenchido com o que derivou e com a recomendação em cada campo aberto, para o usuário (ou outro agente) preencher; com o formulário de volta, valida, pergunta o que restou e escreve o design system. Não especifica as telas de uma mudança, não cria ADR e não escreve código. Usar quando o usuário pedir para criar, consolidar ou atualizar o design system, quando devolver o formulário preenchido, ou quando o /spec-lead parar por falta dele.
-argument-hint: "[proposta do projeto | links de Figma | caminhos de documentos de design do time | caminho do formulário preenchido (opcional)]"
+description: Utilitário do framework (obrigatório em projeto com interface visual). Cria ou atualiza o design system do produto - docs/design-system.md (contexto geral e índice) e um arquivo por categoria em docs/design/ (cores, tipografia, espaçamento, ícones, layout, tema, componentes, padrões de feedback, acessibilidade visual e, sob demanda, botões, formulários, camadas, movimento e divergências). Deriva do código, do Figma e dos documentos do time tudo o que já existe e só pergunta o resto. Em projeto novo, parte da proposta do produto, tira as dúvidas de direção e entrega um formulário técnico de especificação, pré-preenchido com o que derivou e com a recomendação em cada campo aberto, para o usuário (ou outro agente) preencher; com o formulário de volta, valida, pergunta o que restou e escreve o design system. Também guarda modelos de design systems que já existem (ex.: o Primer, do GitHub) - entrega um formulário de clonagem em branco, o usuário o preenche pela documentação oficial e o devolve, e a skill o salva em modelos/<slug>.md - e aplica um modelo salvo a um projeto ("modelo github-primer"), perguntando só o que é do projeto, sem formulário. Não especifica as telas de uma mudança, não cria ADR e não escreve código. Usar quando o usuário pedir para criar, consolidar ou atualizar o design system, quando devolver o formulário preenchido, quando pedir o design system "do modelo X" ou para cadastrar um modelo, ou quando o /spec-lead parar por falta dele.
+argument-hint: "[proposta do projeto | links de Figma | caminhos de documentos de design do time | caminho do formulário preenchido | modelo <slug> | cadastrar modelo <nome> (opcional)]"
 disable-model-invocation: true
 ---
 
@@ -28,6 +28,13 @@ Entrada, em projeto novo: `.temp/design-system-formulario.md`, uma cópia pré-p
 [formulário](formulario.md) que o usuário (ou outro agente) devolve preenchido. É temporário
 (rule `docs.md`): não vai para `docs/`, nenhum documento permanente o cita e quem o apaga é o
 usuário.
+
+**Modelos.** Um modelo é o retrato de um design system que já existe (ex.: o Primer, do GitHub),
+para o usuário pedir "o design system do modelo X" em vez de preencher o formulário. Cada um é
+um arquivo em `modelos/<slug>.md`, ao lado deste, no formato do
+[formulário de clonagem](formulario-modelo.md); a pasta nasce com o primeiro modelo. **Os modelos
+disponíveis são os arquivos dessa pasta:** liste-a (`Glob`), não há índice a manter. Cadastrar é
+a Etapa 7; aplicar, a Etapa 2-C.
 
 **Obrigatório em projeto com interface visual:** o `/spec-lead` não planeja mudança com
 tela sem ele. Rode-o:
@@ -68,24 +75,36 @@ Projeto sem interface (só backend, biblioteca, CLI) não precisa desta skill.
 12. **O formulário é o caminho do projeto novo, e só dele.** No modo criar, ele substitui as
     rodadas de pergunta: emitido pré-preenchido, **nada é escrito em `docs/` até ele voltar**.
     Usuário dispensa ("pergunta direto", "sem formulário") → siga pelas perguntas da Etapa 2-B.
-    No modo atualizar não se emite formulário, salvo pedido explícito do usuário — e aí só com
-    as seções das categorias vazias ou defasadas.
+    Usuário pede um modelo → siga pela Etapa 2-C, sem formulário. No modo atualizar não se emite
+    formulário, salvo pedido explícito do usuário — e aí só com as seções das categorias vazias
+    ou defasadas.
+13. **O modelo é do design system de origem, não da sua memória.** O formulário de clonagem sai
+    em branco e quem o preenche é o usuário, pela documentação oficial; você valida e salva, sem
+    completar valor nenhum. Ao aplicar, o valor do modelo vale como `[referência]`, com o link
+    oficial dele — nunca o caminho do arquivo do modelo.
 
 # Fluxo
 
 ## Etapa 0 — Entrada e modo
 
-1. **Tem interface?** Procure no código e nas ADRs (pelo índice `docs/adr/README.md`) sinais de UI: dependências de
+1. **É sobre um modelo?** Decida antes de tudo, nesta ordem:
+   - o usuário pede para **cadastrar** um modelo ("cadastrar modelo GitHub", "salvar o design
+     system do Material como modelo") ou devolve o formulário de clonagem preenchido (colado no
+     chat, pelo caminho, ou `.temp/design-system-modelo-formulario.md` com campos preenchidos) →
+     **Etapa 7**. Cadastrar não depende do projeto: pule os itens seguintes;
+   - o usuário pede o design system **de um modelo** ("modelo github-primer", "quero o design
+     system do GitHub") → siga os itens 2 e 4 e vá para a **Etapa 2-C**.
+2. **Tem interface?** Procure no código e nas ADRs (pelo índice `docs/adr/README.md`) sinais de UI: dependências de
    frontend, telas, temas. Projeto sem código: veja nas ADRs, nas specs e no
    `docs/architecture.md` se o produto terá telas; na dúvida, pergunte. Sem interface → diga que
    esta skill não se aplica e pare, sem criar arquivo.
-2. **A entrada é um formulário preenchido?** `$ARGUMENTS` aponta um arquivo no formato do
+3. **A entrada é um formulário preenchido?** `$ARGUMENTS` aponta um arquivo no formato do
    [formulário](formulario.md), ou o usuário colou um, ou existe
    `.temp/design-system-formulario.md` com campos preenchidos → vá direto para a **Etapa 3**
    (não reemita o formulário).
-3. **Modo:** `docs/design-system.md` não existe → **criar** (Etapas 1 a 5, pelo formulário).
+4. **Modo:** `docs/design-system.md` não existe → **criar** (Etapas 1 a 5, pelo formulário).
    Existe → **atualizar** (Etapas 1 e 6).
-4. `$ARGUMENTS` (opcional) traz a proposta do projeto e as fontes do usuário: links de Figma,
+5. `$ARGUMENTS` (opcional) traz a proposta do projeto e as fontes do usuário: links de Figma,
    caminhos de documentos de design, ou uma descrição do que o time já decidiu.
 
 ## Etapa 1 — Coletar o que já existe
@@ -102,6 +121,8 @@ Anote o caminho de cada valor encontrado: ele vai para a coluna Origem.
 | Biblioteca de UI | manifesto de dependências (MUI, shadcn/ui, Vuetify, Material…) | componentes |
 | Componentes próprios | `components/`, `ui/`, `shared/widgets/`, storybook; e **como o código os importa** | componentes (ou a família) |
 | Padrões de feedback | leia 1 ou 2 telas existentes: como mostram carregando, erro, vazio, sucesso | padroes-feedback |
+| Campos de formulário | componente de input, estilos de `input`/`textarea`/`select`, `::placeholder`, estados `:focus`/`:invalid`/`:disabled` | formularios |
+| Barra de rolagem | `::-webkit-scrollbar`, `scrollbar-width`, `scrollbar-color`, estilo de `ScrollViewer`/`Scrollbar` | layout |
 | z-index, modais, popovers, toasts | escala de z-index, portais, overlays | camadas-sobreposicoes |
 | Animações | durações, easing, `transition`, `prefers-reduced-motion` | movimento-transicoes |
 
@@ -187,6 +208,39 @@ Prefere responder por perguntas, sem formulário? Diga "pergunta direto".
 4. **Tema:** só claro, claro e escuro, ou seguir o sistema operacional.
 
 Depois, se ainda faltar: densidade, fonte, padrão de carregando e de erro.
+
+### Etapa 2-C — Aplicar um modelo (o usuário pediu "o design system do modelo X")
+
+O modelo responde a identidade: direção, cores, tipografia, espaçamento, ícones, layout, tema,
+componentes, feedback e acessibilidade. Não há formulário; pergunta-se só o que é do projeto.
+
+1. **Ache o modelo.** Liste `modelos/*.md` e case o pedido com o nome ou o slug da seção 1 de
+   cada um. Nenhum casa → mostre os modelos que existem e ofereça cadastrar o pedido (Etapa 7);
+   pare sem escrever. Mais de um casa → pergunte qual, na rodada do item 3.
+2. **Rode a Etapa 1.** A precedência da regra 2 continua: o código vem antes do modelo. Valor que
+   o código já implementa diferente do modelo vira pergunta (o modelo como meta, o código em
+   `divergencias-conhecidas.md`, ou o código como está).
+3. **Uma rodada** de `AskUserQuestion` (até 4 perguntas), só com o que nem o repo nem o modelo
+   respondem, cada uma com a recomendação primeiro:
+   - **plataformas e stack de UI**, quando nenhuma fonte as dá;
+   - **biblioteca base**: a stack tem implementação oficial na seção 1 do modelo → recomende
+     usá-la; não tem → só os tokens, com os componentes como referência de comportamento;
+   - **ajustes à identidade** que o pedido trouxe ("como o GitHub, mas com a minha cor de marca")
+     ou que a seção 14 do modelo deixa para o projeto;
+   - **licença** que restringe o uso fora da organização dona (marca, fonte proprietária): é
+     decisão de produto, nunca suposição.
+   Os `[?]` do modelo seguem a Etapa 3, item 3: identidade entra nesta rodada, default
+   consagrado você decide e lista em "Decidido por default".
+4. **Modo atualizar** (já há `docs/design-system.md`): pedir o modelo é trocar a identidade, e o
+   pedido é a autorização. Reescreva as categorias que o modelo cobre e mande o que o código
+   ainda faz do jeito antigo para `divergencias-conhecidas.md`; categoria que o modelo não cobre
+   (`[—]`) fica como está.
+5. **Escreva pela Etapa 4.** Cada seção do modelo diz o arquivo que alimenta. O valor do modelo
+   tem Origem `[referência] <link oficial do modelo>`; o ajuste do usuário, `[decisão]`. Em
+   "Fontes consultadas", o nome, a versão e o link oficial do modelo. Componente do modelo entra
+   com o import da implementação oficial da stack do projeto; sem implementação oficial, entra
+   só como referência de comportamento, até existir no repo (regra 6). Fecha pela Etapa 5, com a
+   linha "Modelo: <nome> (<versão capturada>)" no resumo.
 
 ## Etapa 3 — Receber o formulário preenchido
 
@@ -287,6 +341,47 @@ Atualizar é **completar**, não reescrever.
 **Formulário na atualização:** só se o usuário pedir. Nesse caso, emita-o como na Etapa 2-A, mas
 **apenas com as seções das categorias vazias, defasadas ou novas** — as coerentes saem do
 arquivo, para não convidar a reescrever o que já está certo — e volte pela Etapa 3.
+
+## Etapa 7 — Cadastrar um modelo
+
+Guarda um design system que já existe para ser aplicado depois (Etapa 2-C). Não lê o projeto e
+não escreve em `docs/`.
+
+1. **Emita o formulário de clonagem.** Copie [formulario-modelo.md](formulario-modelo.md) para
+   `.temp/design-system-modelo-formulario.md` (crie `.temp/` se não existir), remova os
+   comentários `<!-- LLM-ONLY -->` e troque `<nome do design system>`. Ele sai **em branco**
+   (regra 13). Mostre só:
+
+   ```
+   Formulário de modelo: .temp/design-system-modelo-formulario.md
+
+   Preencha pela documentação oficial do design system (cada seção pede o link da fonte) e
+   devolva: cole o conteúdo aqui ou me diga o caminho. Com ele eu salvo o modelo.
+   ```
+
+2. **Receba e valide.** É achado:
+   - campo `(obrigatório)` em branco, ou seção sem **Fonte**;
+   - slug fora de kebab-case sem acentos;
+   - valor sem unidade, token com dois valores, token semântico sem o valor de um dos modos que a
+     seção 8 declara;
+   - linha `(exemplo)` que ficou na tabela.
+   Achado com resposta óbvia (slug, linha de exemplo esquecida) você corrige e diz no resumo. O
+   resto vai numa rodada de `AskUserQuestion`; obrigatório que continuar em branco → diga quais
+   e pare, sem salvar.
+3. **Salve** em `.claude/skills/spec-design-system/modelos/<slug>.md`: o formulário sem a seção 0
+   e sem comentários `<!-- LLM-ONLY -->`. Já existe um modelo com o slug → pergunte se substitui
+   ou se usa outro slug (`behavior.md`, regra 4). Não apague o formulário de `.temp/`: é do
+   usuário. Mostre só:
+
+   ```
+   Modelo salvo: .claude/skills/spec-design-system/modelos/<slug>.md
+   - <nome> <versão capturada> · capturado em <data> · <N> campos `[?]`
+   - Corrigido por mim: <o quê> | nada
+   Aplique num projeto com: /spec-design-system modelo <slug>
+   ```
+
+Salvo no repositório do SpecFlow, o modelo vai para todo projeto na próxima `/spec-upgrade`;
+salvo num projeto, é dele, e a `/spec-upgrade` não o toca (rule `docs.md`).
 
 # Entrada
 

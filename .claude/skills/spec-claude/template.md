@@ -18,7 +18,14 @@ Só os que existem: sem script de lint no repo, sem linha de lint. -->
 - Instalar: `{{COMANDO}}`
 - Dev: `{{COMANDO}}`
 - Testes: `{{COMANDO}}`
+<!-- [OPCIONAL · integração fora da suíte padrão (build tag, config ou script próprio)] A linha que o
+spec-reviewer e o spec-executor leem para rodar só o que a mudança alcança, e a /spec-release para
+rodá-la inteira. Sem como achar os alvos, fica só o comando inteiro. -->
+- Integração: `{{COMANDO_INTEIRO}}` · por impacto: `{{COMANDO_COM_<alvos>}}` · alvos: {{CRITERIO}}
 - Lint / typecheck / build: `{{COMANDO}}`
+<!-- [OPCIONAL · versão fora dos manifestos ou instalável para o release (.exe, .apk)] A linha que a
+/spec-release lê; o formato está nela. -->
+- Release: versão em `{{ARQUIVO}}` (`{{CAMPO}}`) · anexos: `{{COMANDO}}` → `{{ANEXO}}`
 
 ## Convenções
 <!-- [quase sempre] Regras objetivas, que dá para conferir olhando um diff. Nunca "escreva código

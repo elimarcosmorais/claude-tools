@@ -26,7 +26,8 @@ onde cada coisa está definida. Preciso, direto, e sempre dizendo de onde tirou 
 O usuário fala com **um** agente: a skill `spec-lead`. Ela lê o código e decide. A mudança
 pequena e clara ela mesma faz; na maior, ela escreve o plano, quem escreve código é o
 `spec-executor`, um por passo, em sessão isolada, e quem confere a mudança inteira, no fim, é o
-`spec-reviewer`.
+`spec-reviewer`. Pedido de mudança que chega sem o `/spec-lead` (esquecido ou digitado errado)
+vai para ele do mesmo jeito: o agente carrega a skill sozinho (`behavior.md`, regra 7).
 
 ```
   pedido ──► /spec-lead ──► lê o código e decide
@@ -37,12 +38,12 @@ pequena e clara ela mesma faz; na maior, ela escreve o plano, quem escreve códi
   claro, uma passada,                      decisão de produto, contrato novo,
   sem decisão de produto                   área sensível ou vários passos
           │                                             │
-          │                                 1 rodada de perguntas (só produto)
+          │                                 1 rodada de perguntas (produto; fundação no novo)
           │                                             ▼
           │                                  o lead escreve o plano
           │                                             ▼
           │                                ╔════════════════════════╗
-          │                                ║  você aprova (ÚNICO)   ║  --autonomo pula
+          │                                ║  você aprova (ÚLTIMO)  ║  --autonomo pula
           │                                ╚════════════════════════╝
           ▼                                             ▼
    o lead faz sozinho:                   por passo: spec-executor → o lead confere
@@ -50,7 +51,7 @@ pequena e clara ela mesma faz; na maior, ela escreve o plano, quem escreve códi
    que cobrem o que mudou                               ▼
    (ou confere à mão), git add        spec-reviewer: revisão FINAL da mudança inteira
           │                           (suíte, build, lint e tela; segurança se Risco: alto)
-          │                           aprovado │ reprovado → executor corrige (até 2) → de novo
+          │                           aprovado │ reprovado → executor corrige (1 vez) → de novo
           │                                             ▼
           │                                  plano apagado (em stage)
           └──────────────────┬──────────────────────────┘
@@ -68,10 +69,12 @@ pequena e clara ela mesma faz; na maior, ela escreve o plano, quem escreve códi
 Na dúvida entre os dois, é direto: apareceu decisão de produto no meio, o lead promove ali
 mesmo. Critérios completos: `spec-lead`, Etapa 2.
 
-## O usuário é interrompido uma vez
+## O usuário só entra antes da execução
 
-Antes do plano, **uma** rodada de perguntas, só do que é decisão de produto. Depois da
-aprovação, o lead só volta por um dos **quatro motivos da lista fechada de paradas**
+Antes do plano, **uma** rodada de perguntas, do que é decisão de produto, cada pergunta com a
+opção que o lead recomenda. Em projeto novo ela é obrigatória e cobre também a fundação
+(plataforma, stack, banco, onde roda) e a primeira entrega, quando a proposta não as fixa: é a
+decisão de que todo passo depende. Depois vem a aprovação do plano. Depois da aprovação, o lead só volta por um dos **quatro motivos da lista fechada de paradas**
 (`behavior.md`, regra 1):
 
 | Motivo | Exemplo |
@@ -79,7 +82,7 @@ aprovação, o lead só volta por um dos **quatro motivos da lista fechada de pa
 | **a. Exige a pessoa** | UAC, 2FA, conta externa, credencial, testar num aparelho, preencher o formulário do design system, fornecer imagem ou fonte |
 | **b. Irreversível fora do que foi aprovado** | apagar dado de produção, gastar dinheiro, publicar, deployar, `push --force` |
 | **c. Muda o que o produto entrega** | escolha de produto ou de negócio que o plano aprovado não cobre |
-| **d. 3 tentativas no mesmo ponto** | já com causa-raiz escrita, e ainda falhando |
+| **d. 3 tentativas no mesmo ponto** (2 na revisão final) | já com causa-raiz escrita, e ainda falhando |
 
 Fora dessa lista, **perguntar é erro**: decidir é o trabalho do lead, e toda escolha que ele faz
 sai no relatório, em "Decisões que tomei". É ali que o usuário audita a autonomia, em vez de ser
@@ -101,8 +104,9 @@ A revisão segue a mesma lógica: só **bloqueante** (um sênior recusaria o PR)
 executor agora. O que um sênior aceitaria, o revisor aceita calado.
 
 **A única exceção é risco:** segredo, credencial, dado pessoal ou de pagamento exposto, acesso
-indevido, dado que pode se corromper — com correção certa, resolve na mesma rodada; resolvido ou
-não, sai no relatório, em linha própria.
+indevido, dado que pode se corromper — com correção certa, resolve na mesma rodada e sai no
+relatório como entrega ("Riscos fechados"); aberto, só quando toda correção muda o que o produto
+entrega, e aí como "Decidir (risco)", com o ataque, o custo de cada opção e a recomendação.
 
 # 2. Os documentos
 
@@ -113,12 +117,15 @@ Quem mexe em cada um e o tamanho máximo: rule [`docs.md`](../../rules/docs.md).
 | `docs/specs/` | como o sistema funciona hoje, por módulo; índice em `docs/specs/README.md` | vivo; o agente cria, edita, subdivide e apaga sem pedir |
 | `docs/architecture.md` | a arquitetura base | vivo, como as specs |
 | `docs/plans/AAAA-MM-DD-<slug>.md` | o plano de uma mudança ([template](../spec-lead/plano.md)), escrito pelo lead | `rascunho` → `aprovado` (pelo usuário) → executado e apagado pelo lead |
-| `docs/adr/NNN-<titulo>.md` | por que uma decisão transversal foi tomada; índice em `docs/adr/README.md` | `proposto` → `aceito` → `substituído`; decisão nova = ADR nova; escrevem o `spec-executor` (no passo do plano que a registra) e `/spec-adr` |
+| `docs/adr/NNN-<titulo>.md` | por que uma decisão transversal foi tomada; índice em `docs/adr/README.md` | `proposto` → `aceito` → `substituído`; decisão nova = ADR nova; do agente: cria, atualiza e substitui conforme a tarefa pede, sem perguntar; `/spec-adr` para o usuário registrar direto |
 | `docs/design-system.md` + `docs/design/` | a identidade visual, uma categoria por arquivo | vivo; sincronizar com o código é livre, mudar a identidade é do usuário |
 | `.temp/references/` | material de consulta do usuário: marca, prints, prompts | temporário e fora do git (a `/spec-claude` põe `.temp/` no `.gitignore`); só o plano o cita, nenhum documento permanente; quem apaga é o usuário |
 | `.temp/design-system-formulario.md` | a especificação de entrada do design system ([formulário](../spec-design-system/formulario.md)) | temporário; `/spec-design-system` emite pré-preenchido, o usuário ou outro agente preenche, a skill lê e escreve o design system |
+| `.temp/design-system-modelo-formulario.md` | o retrato de um design system que já existe ([formulário de clonagem](../spec-design-system/formulario-modelo.md)) | temporário; `/spec-design-system` emite em branco, o usuário preenche pela documentação oficial, a skill o salva como modelo |
+| `.claude/skills/spec-design-system/modelos/<slug>.md` | um modelo de design system pronto (ex.: o Primer, do GitHub) | `/spec-design-system` grava ao cadastrar e aplica com `modelo <slug>`; o do projeto a `/spec-upgrade` não toca |
 | `CLAUDE.md` | o contrato do agente com este projeto: stack, comandos reais, convenções, onde coisas novas vão | vivo só nos **fatos** (o agente sincroniza com o repo); criar, auditar e toda **regra** nova são do usuário, por `/spec-claude` |
-| `CHANGELOG.md` | o que mudou para quem usa, por versão lançada | só `spec-release` escreve, uma seção por versão; a versão em si é a tag |
+| `CHANGELOG.md` | o que mudou para quem usa, por versão lançada | só `spec-release` escreve, uma seção por versão; a versão em si é a tag; o instalável vai anexado ao GitHub Release, pela linha `Release:` do `CLAUDE.md` |
+| `.claude/` do framework: skills e agents `spec-*`, `behavior.md`, `docs.md` | o SpecFlow | não se edita no projeto: a `/spec-upgrade` sobrescreve; o que o projeto tem de próprio vai para o `CLAUDE.md` ou para skill ou rule dele |
 
 - **Plano** junta problema, comportamento (CAs), decisões, telas, contratos, specs afetadas e os
   **passos**. Seção que não se aplica é removida. Mudança grande é um plano com mais passos,
@@ -130,15 +137,15 @@ Quem mexe em cada um e o tamanho máximo: rule [`docs.md`](../../rules/docs.md).
 - **Specs** andam com o código: o passo que muda um comportamento atualiza a spec dele, no mesmo
   diff, e a revisão final confere. Passou de 300 linhas → subdivide (`assunto.md` vira índice dos
   pedaços em `assunto/`) e avisa no fim.
-- **ADR**: só decisão transversal, cara de mudar e com alternativa real. **Ninguém decide na
-  ADR** — ela registra a escolha já feita (pelo usuário ao aprovar o plano, ou pelo lead), e por
-  isso nasce `aceito` quando vem de um plano aprovado. Quem a escreve é o `spec-executor`, no
-  primeiro passo que depende dela, ou `/spec-adr`, quando o usuário registra direto. Executor e
-  revisor tratam ADR `aceito` como contrato; quem procura uma lê o índice (só as em vigor,
-  coluna "Abra quando", agrupado por tema acima de 20). A **correção verificável** (link
-  quebrado, referência inexistente, digitação) o executor faz quando ela atrapalha o passo; o
-  que a ADR afirma, o `status`, `Substitui`/`Substituída por` e a ADR `substituído` ficam fora e
-  viram proposta com o comando `/spec-adr` pronto (rule `docs.md`).
+- **ADR**: só decisão transversal, cara de mudar e com alternativa real. **É do agente, não do
+  usuário:** o usuário aprova o plano, e a ADR registra o que a tarefa decidiu — por isso nasce
+  `aceito`. O agente a cria, atualiza e substitui sempre que cumprir a tarefa pede, sem
+  perguntar nem deixar proposta: a que a tarefa tornou falsa ele atualiza na mesma tarefa, como
+  a spec; a decisão que a tarefa troca vira ADR nova com **Substitui**, e a antiga só ganha
+  `substituído` (histórico não se reescreve). `/spec-adr` fica para o usuário que quer registrar
+  direto. Executor e revisor tratam ADR `aceito` como contrato — não se contraria por
+  preferência —, e o revisor reprova ADR que o diff deixou errada. Quem procura uma lê o índice
+  (só as em vigor, coluna "Abra quando", agrupado por tema acima de 20). Rule `docs.md`.
 - **CLAUDE.md**: carrega em toda sessão de todo agent, então desatualizado ele mente para quem
   confia nele. O corte é mecânico: **fato que um arquivo do repo responde** (comando de teste,
   versão da stack, pasta ou camada nova, ferramenta de teste visual, `.temp/` no `.gitignore`) se
@@ -150,7 +157,8 @@ Quem mexe em cada um e o tamanho máximo: rule [`docs.md`](../../rules/docs.md).
   tela sem ele — é parada do tipo **a**. Em projeto novo, a `spec-design-system` tira as dúvidas
   de direção, entrega o formulário pré-preenchido em `.temp/design-system-formulario.md` e só
   escreve `docs/` quando ele volta preenchido; em projeto que já tem design system, ela atualiza
-  por perguntas, e o formulário só sai se o usuário pedir.
+  por perguntas, e o formulário só sai se o usuário pedir. Pedido "do modelo X" dispensa o
+  formulário: a skill aplica o modelo salvo em `modelos/` e pergunta só o que é do projeto.
 
 # 3. A execução
 
@@ -164,20 +172,31 @@ depois para a mudança inteira:
 
   todos os passos ──► spec-reviewer (revisão final) ──┬─ aprovado ──► fecha
                                                        └─ reprovado ──► um executor corrige todos os
-                                                          bloqueantes (até 2)
-                                                          3ª reprovação → parada (tipo d)
+                                                          bloqueantes (1 vez) → revisão de novo
+                                                          2ª reprovação → parada (tipo d), com o
+                                                          que fazer em cada bloqueante
 ```
 
-- **A equipe:** `spec-executor` (implementa passo ou correção, e registra a ADR do plano) e
+- **A equipe:** `spec-executor` (implementa passo ou correção, e cria, atualiza ou substitui as
+  ADRs que o passo pede) e
   `spec-reviewer` (revisão final, só JSON). O resto é do lead: ler o código, decidir, escrever o
   plano, conferir cada passo — e, no caminho direto, fazer a mudança inteira sozinho.
 - **Executor, por passo.** Contexto limpo, só o passo. "Arquivos" não é cerca: o que o passo
   precisa para funcionar ele toca e diz em `Também mexi`. O que não atrapalha o passo ele não
-  toca, nem anota.
-- **Revisão, uma só.** No fim, sobre o diff inteiro em stage: roda a suíte, o build, o lint e o
-  teste de tela, confere cada "Pronto quando", o escopo, as ADRs, a arquitetura e, com passo
+  toca, nem anota. Itera com o teste dirigido de cada item do "Pronto quando"; a suíte, o build,
+  o lint e a integração por impacto rodam **uma vez**, no fechamento do passo. Na correção dos bloqueantes
+  da revisão, nem isso: ele roda só os testes do que corrigiu, porque o revisor roda tudo logo
+  em seguida.
+- **Revisão, uma só.** No fim, sobre o diff inteiro em stage: dispara a suíte, o build, o lint, a
+  integração por impacto e o teste de tela em segundo plano e, enquanto rodam, confere cada "Pronto quando", o escopo, as ADRs, a arquitetura e, com passo
   `Risco: alto`, a segurança. **Binária:** aprovado, ou bloqueantes que voltam ao executor.
   Não existe "melhoria". Os números da rodada aprovada são as provas do relatório.
+- **Integração por impacto.** A linha `Integração:` do `CLAUDE.md` traz o comando inteiro, o
+  comando por impacto e o critério dos alvos (em Go, os pacotes que dependem do que mudou). A
+  revisão roda só os alvos da rodada e, na tentativa 2, só os da correção, mais o que falhou
+  ou pulou antes; arquivo que o critério não liga a alvo nenhum (manifesto, `Taskfile`, CI) pede
+  o comando inteiro. Teste fora dos alvos não é pulado (`behavior.md`, regra 3). A integração
+  **inteira** roda na `/spec-release`, uma vez por versão, e vermelha não lança.
 - **Git:** o passo conferido fica em stage, nunca commitado. A revisão final lê
   `git diff --staged` da rodada inteira.
 - **Fechamento:** revisão aprovada, com suíte, build e lint **inteiros** verdes e **sem teste
@@ -196,7 +215,8 @@ depois para a mudança inteira:
 
 - `behavior.md`: regras de comportamento, sempre carregadas. A regra 1 (decidir é o trabalho, com
   a lista fechada de paradas) e a regra 2 (a tarefa é a entrega: não existe débito) são o que
-  define a autonomia do fluxo.
+  define a autonomia do fluxo; a regra 7 põe todo pedido de mudança na `spec-lead`, mesmo sem o
+  comando.
 - `docs.md`: onde cada documento mora, quem mexe, tamanho máximo; sempre carregada.
 - `<tema>.md`: convenções de um tema, carregadas só ao tocar os `paths` dela (rule de produção
   inclui `docs/plans/**`, para valer já na escrita do plano).
@@ -212,8 +232,10 @@ depois para a mudança inteira:
 | Ver as ADRs que os planos pedem e ainda faltam | `/spec-adr` (vazio) |
 | Criar, corrigir ou reorganizar o índice das ADRs | `/spec-adr índice` |
 | Criar ou atualizar o design system | `/spec-design-system [proposta, Figma, docs ou o formulário preenchido]` |
+| Usar um design system pronto (ex.: o do GitHub) | `/spec-design-system modelo <slug>` |
+| Guardar um design system que já existe como modelo | `/spec-design-system cadastrar modelo <nome>` |
 | Commitar todas as mudanças | `/spec-semantic-commit` |
-| Lançar uma versão (SemVer, CHANGELOG, tag, GitHub Release), ou ver qual seria a próxima | `/spec-release [major \| minor \| patch \| X.Y.Z]` |
+| Lançar uma versão (integração inteira, SemVer, CHANGELOG, tag, GitHub Release com o instalável), ou ver qual seria a próxima | `/spec-release [major \| minor \| patch \| X.Y.Z]` |
 | Criar ou atualizar o README | `/spec-readme [pasta]` |
 | Criar, auditar ou enxugar o CLAUDE.md, ou acrescentar uma regra a ele (e garantir `.temp/` no `.gitignore`) | `/spec-claude [pasta]` |
 | Deixar o agente ver e operar a tela do Windows (screenshot, clique, teclado) | `/spec-windows-mcp [ferramentas extras]` |
@@ -224,7 +246,8 @@ Documentar ou reorganizar specs não tem comando: o agente faz quando precisa (r
 Executar um plano também não tem comando próprio: quem executa é o lead, na mesma rodada em que
 o plano foi aprovado, ou `/spec-lead continuar`.
 
-**Próximo passo de um plano:** `rascunho` → o usuário revisa e aprova, e o lead segue na hora;
+**Próximo passo de um plano:** `rascunho` → o usuário revisa e aprova, e o lead segue na hora
+(rascunho de projeto novo parado pelo design system → `/spec-lead continuar`, depois dele);
 `aprovado` com passo pendente → `/spec-lead continuar`; plano sumiu de `docs/plans/` → foi
 executado por inteiro: commit, se houver algo em stage (`git diff --staged --stat`).
 
@@ -242,7 +265,9 @@ CLAUDE.md, README.md, CHANGELOG.md (só depois da primeira versão)
 │   consulta ou script quando a skill precisa — ex.: plano.md e relatorio.md na spec-lead,
 │   uso.md e verificar.py nas skills de MCP)
 ├── agents/spec-executor.md, spec-reviewer.md
-└── rules/behavior.md, docs.md (sempre) e <tema>.md (só ao tocar os paths dela)
+├── rules/behavior.md, docs.md (sempre) e <tema>.md (só ao tocar os paths dela)
+└── settings.json            do projeto; o framework só junta nele as regras `ask` (ex.: a que
+                             segura o `RunAs` até o usuário chegar, regra 5) — /spec-upgrade
 docs/
 ├── adr/README.md            índice; as ADRs NNN-<titulo>.md ao lado
 ├── specs/README.md          índice; os assuntos ao lado, subdivididos em pastas
@@ -252,7 +277,8 @@ docs/
 └── design/<categoria>.md
 .temp/                       fora do git (está no .gitignore)
 ├── references/              brand/, prompts/, screens/…
-└── design-system-formulario.md   só até a spec-design-system consumi-lo
+├── design-system-formulario.md          só até a spec-design-system consumi-lo
+└── design-system-modelo-formulario.md   só até a spec-design-system salvar o modelo
 ```
 
 - Nomes em kebab-case, sem acentos. ADR com numeração de três dígitos, sequencial, nunca
@@ -277,6 +303,9 @@ docs/
   sugestões sempre acha, e cada passagem de bastão é um lugar para deixar recado. No lugar
   entraram **tarefa dada é tarefa cumprida** (`behavior.md`, regra 2), a **revisão final
   binária** e a **lista fechada de paradas**.
+- A **terceira tentativa** da revisão final (a segunda correção dos bloqueantes): quando a
+  primeira correção não passava, a segunda também não passava, e só adiava o relatório. Hoje são
+  2 tentativas, e a segunda reprovação para com o que fazer em cada bloqueante.
 - Da v1.0, removidas por falta de uso: as skills `spec-rule-create` (rule com as convenções de
   um tema) e `spec-rule-curate` (decidir se um item vira regra, auditar as rules). Regra nova
   vai pela `/spec-claude`.

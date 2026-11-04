@@ -8,13 +8,16 @@ Onde cada documento mora, quem pode mexer nele e quando. Vale em qualquer tarefa
 |---|---|---|
 | `docs/specs/` | **como o sistema funciona hoje**, por módulo ou assunto | o agente, livremente |
 | `docs/architecture.md` | a arquitetura base: camadas, módulos, fluxos e integrações principais | o agente, livremente |
-| `docs/adr/NNN-<titulo>.md` + índice `docs/adr/README.md` | **por que** uma decisão transversal foi tomada | o `spec-executor`, no passo do plano que a registra, ou `/spec-adr`, sempre com a decisão já tomada |
+| `docs/adr/NNN-<titulo>.md` + índice `docs/adr/README.md` | **por que** uma decisão transversal foi tomada | o agente: cria, atualiza e substitui conforme a tarefa pede (abaixo); `/spec-adr` quando o usuário registra direto |
 | `docs/design-system.md` + `docs/design/` | a identidade visual: tokens, componentes e padrões | `/spec-design-system`; sincronizar com o código é livre |
 | `docs/plans/AAAA-MM-DD-<slug>.md` | o plano de uma mudança, até ser executado | o `/spec-lead` escreve, o usuário aprova, o lead executa e apaga |
 | `.temp/references/` | material de consulta temporário do usuário: marca, prints, prompts | o usuário |
 | `.temp/design-system-formulario.md` | a especificação de entrada do design system, até ser preenchida e consumida | `/spec-design-system` cria, o usuário (ou um agente) preenche, a skill lê |
+| `.temp/design-system-modelo-formulario.md` | o retrato de um design system que já existe, até virar modelo | `/spec-design-system` cria em branco, o usuário preenche, a skill o salva em `modelos/` |
+| `.claude/skills/spec-design-system/modelos/<slug>.md` | os modelos de design system prontos para aplicar | `/spec-design-system` grava, ao cadastrar um modelo (abaixo) |
 | `CLAUDE.md` | o contrato do agente com **este** projeto: stack, comandos reais, convenções, onde coisas novas vão | `/spec-claude` cria e audita, com o usuário; o **fato** que o repo responde, o agente sincroniza livremente (abaixo) |
 | `CHANGELOG.md` | o que mudou para quem usa, em cada versão lançada | `/spec-release`, a cada versão |
+| `.claude/skills/spec-*`, `.claude/agents/spec-*`, `.claude/rules/behavior.md` e `docs.md` | o framework SpecFlow | ninguém no projeto: a `/spec-upgrade` os traz do SpecFlow (abaixo) |
 
 **Não duplique.** A spec diz **como funciona** e aponta para a ADR que diz **por quê**. O plano
 diz o que uma mudança vai fazer e some depois dela: o que sobrevive vai para a spec (como
@@ -50,38 +53,32 @@ Vale para spec, `architecture.md`, `design-system.md` e os arquivos de `docs/des
 
 A profundidade é livre: um pedaço que passar de 300 linhas se subdivide do mesmo jeito.
 
-## ADRs: pelo índice
+## ADRs: do agente, pelo índice
 
 `docs/adr/README.md` lista só as ADRs em vigor, com a coluna "Abra quando", agrupadas por tema
 quando passam de 20. Substituída sai do índice: o histórico fica nas próprias ADRs (a nova
 aponta a antiga em **Substitui**). Para achar a ADR de um assunto, leia o índice e abra só as
 que a coluna aponta; o status que vale é o do arquivo da ADR. Sem índice, liste `docs/adr/`.
-Quem escreve ADR e índice é o `spec-executor`, no passo do plano que a registra (a decisão já
-veio tomada no plano aprovado), ou a skill `/spec-adr`, quando o usuário registra uma decisão
-direto: os dois atualizam o índice a cada ADR salva, e `/spec-adr índice` o reorganiza. **Ninguém decide aqui** — a ADR
-registra a escolha, não a faz. A única exceção ao dono único é a correção verificável, abaixo.
 
-### Correção verificável: a exceção ao dono único
+**ADR é do agente, não do usuário.** O usuário aprova o plano; a ADR registra o que a tarefa
+decidiu, e o agente a cria e a modifica sempre que cumprir a tarefa pede — o `spec-executor` no
+passo do plano, o `/spec-lead` no caminho direto. Nada disso pede confirmação (`behavior.md`,
+regra 4) nem vira proposta para o usuário: ADR que a tarefa deixou errada é a tarefa por
+terminar (`behavior.md`, regra 2). `/spec-adr` continua servindo ao usuário que quer registrar
+uma decisão direto, e `/spec-adr índice` reorganiza o índice.
 
-Quando o erro atrapalha a tarefa (`behavior.md`, regra 2) — o passo usa aquela ADR, ou o
-índice que ele vai editar —, o `spec-executor` corrige numa ADR `proposto` ou `aceito`, e no
-índice, **sem pedir confirmação** (`behavior.md`, regra 4), só o erro que se confere sem julgar
-o conteúdo:
+| A tarefa… | O agente |
+|---|---|
+| toma uma decisão transversal, cara de mudar e com alternativa real | **cria** a ADR (`aceito`) e a linha dela no índice |
+| torna falso o que uma ADR afirma — caminho, mecanismo, nome, consequência —, e a decisão continua de pé | **atualiza** a ADR no lugar, na mesma tarefa, como faria com uma spec |
+| muda a própria decisão | **substitui**: ADR nova com **Substitui**; na antiga, `status: substituído` e **Substituída por**; tira a antiga do índice |
+| esbarra em link quebrado, referência inexistente ou erro de digitação numa ADR ou no índice | **corrige** |
 
-- link que não resolve, ou referência a uma ADR, arquivo ou âncora que não existe;
-- erro de digitação, de acentuação ou de formatação Markdown que não muda o que a ADR afirma.
-
-A prova é a conferência mecânica do `Pronto quando` — abrir o link e ver que resolve, conferir
-que o arquivo citado existe (`behavior.md`, regra 3).
-
-Fica **fora**, e vira proposta no relatório com o comando `/spec-adr` pronto:
-
-- **o que a ADR afirma** — Contexto, Decisão, Consequências, Alternativas. Vale também para a
-  consequência que se revelou errada: ela é juízo novo sobre a decisão, e se a decisão ainda se
-  sustenta é o usuário que diz;
-- **`status`, `Substitui` e `Substituída por`**, que são o contrato e o histórico: decisão nova
-  continua sendo ADR nova, nunca edição da antiga;
-- **toda ADR `substituído`**, que é histórico e não se reescreve.
+Duas coisas seguram o histórico, e nenhuma é motivo de parar: **trocar a decisão é substituir,
+nunca reescrever** — a ADR antiga é o registro de por que se fez assim, e a `substituído` não se
+edita mais; e **ADR `aceito` é contrato** — o agente não a contraria por preferência, só quando a
+tarefa pede outra coisa, e aí a substitui. Toda ADR criada, atualizada ou substituída sai no
+relatório.
 
 O índice `docs/adr/README.md` é recurso disputado: os passos rodam um de cada vez, e nenhum
 agent o edita em paralelo.
@@ -100,7 +97,7 @@ governa o próprio agente, e por isso o corte é mais estreito que o das specs:
 
 | O que mudou | Quem resolve |
 |---|---|
-| **Fato que um arquivo do repo responde:** comando de teste, build ou lint, versão da stack, pasta ou camada que passou a existir, ferramenta de teste visual instalada, `.temp/` fora do `.gitignore` | o agente, **livremente** — é sincronizar documento com código, como numa spec |
+| **Fato que um arquivo do repo responde:** comando de teste, integração, build ou lint, versão da stack, pasta ou camada que passou a existir, ferramenta de teste visual instalada, `.temp/` fora do `.gitignore` | o agente, **livremente** — é sincronizar documento com código, como numa spec |
 | **Regra nova:** convenção que ninguém escreveu, anti-padrão, "sempre faça X", "nunca edite Y" | o **usuário**: `/spec-claude` |
 
 O teste é mecânico: **deu para extrair de um arquivo do repo?** É fato. **Veio do juízo de alguém
@@ -119,6 +116,25 @@ não responde (o idioma, os anti-padrões que o time mais corrige). Mas a ausên
 trava** demanda nenhuma: o agente lê o repo e trabalha sem ele, e `/spec-claude` vai para o
 relatório como proposta. Nisso ele é o oposto do design system, que trava de propósito — tela
 sem identidade visual sai para ser jogada fora; código sem `CLAUDE.md` sai um pouco pior.
+
+## Arquivos do framework: não se editam no projeto
+
+As skills e os agents `spec-*` e as rules `behavior.md` e `docs.md` vêm do SpecFlow, e a
+`/spec-upgrade` os traz de novo a cada versão: editado no projeto, um deles perde a edição na
+atualização seguinte ou fica preso a uma versão velha. Por isso o "resolva no arquivo que
+precisar" (`behavior.md`, regra 2) não os alcança.
+
+Faltou algo numa skill do framework para cumprir o pedido → cumpra-o sem editá-la: rode você os
+comandos que ela rodaria, com o que o projeto pede. O que o projeto tem de próprio vai para um
+arquivo dele: o fato para o `CLAUDE.md` (como a linha `Release:` que a `/spec-release` lê), o
+procedimento para uma skill ou rule do projeto, com nome sem o prefixo `spec-`. O
+`.claude/settings.json` é do projeto e fica fora desta regra. No repositório do próprio SpecFlow
+esses arquivos são a fonte, e editá-los é o trabalho.
+
+A exceção é `.claude/skills/spec-design-system/modelos/`: a `/spec-design-system` grava ali o
+modelo que o usuário cadastra. Modelo criado no projeto nunca existiu no framework, e por isso a
+`/spec-upgrade` o trata como do projeto e não o toca; cadastrado no repositório do SpecFlow, ele
+chega a todos os projetos na atualização seguinte.
 
 ## Planos: temporários
 
@@ -144,7 +160,9 @@ Quem apaga é o usuário; o agente não apaga nem move nada ali.
 O formulário do design system (`.temp/design-system-formulario.md`) mora em `.temp/` pela mesma
 razão: a `/spec-design-system` o cria pré-preenchido e o lê de volta, o usuário (ou outro agente)
 o preenche, e quem o apaga é o usuário. Ele é entrada, não documentação: o que ele responde vai
-para `docs/design-system.md` e `docs/design/`, e nenhum documento permanente o cita.
+para `docs/design-system.md` e `docs/design/`, e nenhum documento permanente o cita. O formulário
+de modelo (`.temp/design-system-modelo-formulario.md`) segue a mesma regra: o que ele responde
+vai para `modelos/<slug>.md`.
 
 ## Nomes
 

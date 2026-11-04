@@ -15,7 +15,7 @@ Parar e perguntar é a **exceção**, e só por um destes quatro motivos:
 | **a. Exige a pessoa** | UAC, 2FA, conta externa, credencial que você não tem, testar num aparelho, preencher o formulário do design system, fornecer imagem ou fonte |
 | **b. Irreversível fora do que foi aprovado** | apagar dado de produção, gastar dinheiro, publicar, deployar, `push --force` |
 | **c. Muda o que o produto entrega** | escolha de produto ou de negócio, não coberta pelo plano aprovado, que muda o que o usuário final recebe |
-| **d. 3 tentativas no mesmo ponto** | já com análise de causa-raiz escrita, e ainda falhando |
+| **d. 3 tentativas no mesmo ponto** (2 na revisão final) | já com análise de causa-raiz escrita, e ainda falhando |
 
 **Fora desta lista, perguntar é erro.** "Na dúvida, pergunte" é o que fazia uma demanda simples
 custar dias: a dúvida é sua para resolver. Decidiu e errou → o registro da decisão deixa o
@@ -39,7 +39,7 @@ O problema que aparecer pelo caminho tem só duas leituras:
 
 1. **Atrapalha a tarefa** — quebra o que você está fazendo, impede o teste de passar, é
    pré-requisito do pedido, ou é algo que o próprio pedido tornou falso (um chamador, um teste,
-   uma spec, um fato do `CLAUDE.md`) → **é a tarefa**. Resolva, no arquivo que precisar, e diga
+   uma spec, uma ADR, um fato do `CLAUDE.md`) → **é a tarefa**. Resolva, no arquivo que precisar (menos os do framework: rule `docs.md`), e diga
    numa linha o que foi.
 2. **Não atrapalha** → **não é assunto seu**. Não corrige, não anota, não relata, nem como nota.
    Não existe campo de "notei", fila, plano para depois nem "fica a sugestão".
@@ -49,8 +49,12 @@ O problema que aparecer pelo caminho tem só duas leituras:
 
 **A única exceção é risco.** Segredo, credencial, dado pessoal ou de pagamento expostos, caminho
 para acesso indevido, dado que pode se corromper ou se apagar: tem uma correção certa → resolva
-na mesma rodada, é o único caso em que ela cresce além do pedido. Resolvido ou não, ele **sempre
-aparece no relatório**, em linha própria, com `arquivo:linha`.
+na mesma rodada, é o único caso em que ela cresce além do pedido. Ele **sempre aparece no
+relatório**, com `arquivo:linha`: fechado, como entrega; aberto, só quando **toda** correção muda
+o que o produto entrega, e aí como decisão do usuário (regra 1, motivo **c**), com o ataque
+concreto, o custo de cada opção e a recomendação — nunca como aviso de que "continua aberto".
+Limite que só alcança quem já tem um acesso que vale mais (gravar na pasta servida já permite
+rodar código) não é risco.
 
 ## 3. "Funciona" só com evidência
 
@@ -64,6 +68,11 @@ serviço, porta, dado de teste) é **sua para montar**, não tarefa do usuário 
 novo. Não conseguiu → conte o pulado junto com o não rodado, com o nome do teste e o motivo, e
 nunca o apresente como prova: o item que ele deveria provar continua **sem prova**.
 
+**Fora do alcance não é pulado.** A integração por impacto (linha `Integração:` do `CLAUDE.md`)
+roda só os testes que dependem do que mudou: o que ela não roda não tinha nada a provar sobre a
+mudança, e a `/spec-release` o roda inteiro a cada versão. Pulado é o teste do alcance que rodou e
+não exerceu.
+
 **Projeto sem suíte não impede provar.** Onde não há o que rodar naquela camada, a prova é a
 conferência mecânica que o "Pronto quando" descreve: abrir o link e ver que resolve, conferir
 que o arquivo citado existe, reler a linha e ver que ela diz o que o código faz. Falta de prova
@@ -72,13 +81,12 @@ que o arquivo citado existe, reler a linha e ver que ela diz o que o código faz
 ## 4. Ação destrutiva ou irreversível exige confirmação antes
 
 Ex.: apagar arquivos ou pastas fora do fluxo, editar plano `aprovado` (fora dos checkboxes e do
-status), ADR `aceito` ou `substituído`, `git reset`/`git restore` fora do que a própria rodada
-acabou de escrever, `push --force`, commit e push, migração de schema em base real, delete de
+status), `git reset`/`git restore` fora do que a própria rodada acabou de escrever, `push --force`, commit e push, migração de schema em base real, delete de
 dados em massa.
 
 **Não pedem confirmação**, porque o fluxo já as autoriza: mexer nas specs e no
-`docs/architecture.md` (rule `docs.md`), resolver o que atrapalha a tarefa (regra 2), corrigir o
-erro verificável numa ADR `proposto` ou `aceito`, apagar o plano que acabou de ser executado por
+`docs/architecture.md` (rule `docs.md`), resolver o que atrapalha a tarefa (regra 2), criar,
+atualizar e substituir ADR (rule `docs.md`), apagar o plano que acabou de ser executado por
 inteiro, e desfazer o que a própria rodada acabou de escrever quando ela deixou o gate vermelho.
 
 ## 5. Precisou de admin → eleve só aquele comando
@@ -90,9 +98,12 @@ saída, então grave-a num log e leia-o depois (é a evidência da regra 3).
 **O diálogo é do humano, e tem prazo.** Ele nasce no desktop seguro, em integridade alta: nenhum
 MCP de tela o vê nem clica nele — não tente, nem com `PromptOnSecureDesktop=0`, porque o UIPI
 barra input sintético num processo de integridade alta. Ele expira em ~2 minutos, e expirar
-conta como recusa: a sessão tem como notificar (ex.: `PushNotification`) → avise ao elevar, para
-quem acompanha de longe chegar a tempo. Chame com timeout de 300000 ms, senão o default de 2
-minutos da ferramenta corta junto com o diálogo.
+conta como recusa. Por isso o `.claude/settings.json` do framework tem regras `ask` que
+**seguram** todo comando com `RunAs` antes de ele rodar, em qualquer modo de permissão e também
+num subagent: o Claude Code chama o usuário (no desktop e, com o Remote Control, no celular) e
+espera sem prazo, e o UAC só abre depois que ele aprova, já na frente do PC. Recusar esse pedido
+é UAC não autorizado. Chame com timeout de 300000 ms, senão o default de 2 minutos da ferramenta
+corta junto com o diálogo.
 
 O `Start-Process` **lança** quando ninguém autoriza. Sem o `try/catch`, o agente lê "ninguém
 autorizou" como erro do comando e vai procurar defeito no código:
@@ -112,8 +123,10 @@ que entra no relatório, com o comando pronto para o usuário rodar.
 (`runas /savecred`) e não crie tarefa agendada elevada: tarefa cuja ação está num caminho
 gravável pelo usuário é escalada de privilégio permanente, e a que aponta para saída de build
 (`bin/`, `dist/`) é a pior delas. Também não troque o alvo do teste por um caminho que não passa
-pelo UAC: aí ele fica verde provando outra coisa, que é o teste pulado com outra roupa. Precisa
-de admin **sem** o gesto humano com frequência → é decisão do usuário (ADR), não atalho de
+pelo UAC: aí ele fica verde provando outra coisa, que é o teste pulado com outra roupa. Nem
+escreva o `RunAs` de outro jeito (variável, string montada, codificada) para não casar com a
+regra `ask`, nem a tire do settings: é ela que traz o humano a tempo. Precisa
+de admin **sem** o gesto humano com frequência → é decisão do usuário, não atalho de
 execução.
 
 A prova que exige o gesto humano nasce marcada `(manual: …)` no plano e é recolhida no relatório
@@ -130,6 +143,23 @@ Por isso, arquivo com `\` — caminho do Windows, regex, literal com escape (`"C
 JSON) — se escreve e se edita **pelo Write/Edit**, nunca por heredoc, `echo`, `printf` ou `sed`
 no Bash. Escreveu por outro caminho → confira os bytes (`od -c` ou `Format-Hex`) antes de contar
 o teste como prova (regra 3).
+
+## 7. Pedido de mudança entra pela `spec-lead`, mesmo sem o comando
+
+Pedido que muda o projeto (código, teste, spec, ADR, plano) é trabalho da skill `spec-lead`.
+Só ela escolhe entre o caminho direto e o plano, só ela escreve plano, e só ela chama o
+`spec-executor` e o `spec-reviewer`. Pedido desses chegou sem a skill carregada, porque o
+usuário não a chamou ou errou o nome (`/sepc-lead`, `/spec-led`)? Então **carregue a `spec-lead`
+pela ferramenta Skill**, com o pedido do usuário como argumento, e siga-a. Não comece pela
+edição nem por um plano seu: implementar direto pula a decisão de caminho, o executor e a
+revisão final, e planejar por fora pula o template e a aprovação.
+
+Isto não é parada nem pergunta: o usuário pediu a mudança, e a `spec-lead` é como ela se faz.
+`--autonomo` só vai no argumento quando o usuário o escreveu.
+
+Ficam de fora: pergunta, explicação ou leitura que não muda nada; a skill do framework que o
+usuário chamou para o que ela faz (`/spec-semantic-commit`, `/spec-claude`, `/spec-adr`…); e quem
+já está no fluxo, ou seja, a própria `spec-lead` e os agents que ela chama.
 
 ---
 
