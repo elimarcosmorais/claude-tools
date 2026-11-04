@@ -40,11 +40,17 @@ destino. Se algo falha (pasta inexistente, destino que é um diretório, rename 
 Claude Code está com o arquivo aberto), o destino fica como estava, o temporário é apagado e o
 comando sai com `Erro: <detalhe>` e código 1. Basta rodar de novo.
 
+No Linux, todo arquivo gravado assim (inclusive `<conta>.credentials.json`,
+`backup.credentials.json` e `CRED`) fica com permissão `0600`, mesmo que o anterior fosse mais
+aberto, porque o temporário nasce `0600` e substitui o destino; `STORE` e `~/.claude`, quando
+criados pelo `claude-tools`, ficam com `0700` (menos o que a `umask` tirar).
+
 ## Nome de conta
 
 - `[A-Za-z0-9_-]`, de 1 a 32 caracteres (`account.NormalizeName`).
-- Gravado em minúsculas: `A_b-1` vira `a_b-1`. O sistema de arquivos do Windows não diferencia
-  maiúsculas, então `Trabalho` e `trabalho` são a mesma conta.
+- Gravado em minúsculas nos dois sistemas: `A_b-1` vira `a_b-1`, e `Trabalho` e `trabalho` são a
+  mesma conta. O sistema de arquivos do Windows não diferencia maiúsculas; no Linux, que
+  diferencia, gravar em minúsculas mantém a mesma regra.
 - `backup` é reservado (em qualquer caixa), porque os arquivos `backup.*` são as cópias de
   segurança. `backup2` é um nome válido.
 - Fora da regra, saída 2 e a mensagem no stderr:

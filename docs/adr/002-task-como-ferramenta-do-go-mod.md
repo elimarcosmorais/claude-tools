@@ -21,7 +21,7 @@ manda o código usar só a biblioteca padrão, e o `go.mod` não tinha `require`
 O Task (`github.com/go-task/task/v3/cmd/task`, v3.54.0) é uma diretiva `tool` do `go.mod`, e todo
 comando o chama por `go tool task <tarefa>`. O código do `claude-tools` continua só com a
 biblioteca padrão (ADR 001): a diretiva `tool` só serve ao desenvolvimento, e o `go build` do
-`claude-tools.exe` não compila nem embute nada dela.
+executável do `claude-tools` não compila nem embute nada dela.
 
 ## Consequências
 

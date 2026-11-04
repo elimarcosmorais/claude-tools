@@ -1,9 +1,10 @@
 # CLAUDE.md
 
 ## Visão do projeto
-CLI de Windows (`claude-tools.exe`) que guarda logins do Claude Code com um nome e troca entre
-eles copiando arquivos em `~/.claude`; sem rede, banco nem serviço. Uso pessoal, instalado na
-pasta passada ao `go tool task install` (sem pasta padrão).
+CLI de Windows e Linux/WSL2 (`claude-tools.exe` e `claude-tools`, do mesmo código:
+[ADR 003](docs/adr/003-windows-e-linux-do-mesmo-codigo.md)) que guarda logins do Claude Code com
+um nome e troca entre eles copiando arquivos em `~/.claude`; sem rede, banco nem serviço. Uso
+pessoal, instalado na pasta passada ao `go tool task install` (sem pasta padrão).
 
 ## Stack
 - Go 1.27 (`go.mod`), só a biblioteca padrão no código: um executável único ([ADR 001](docs/adr/001-go-binario-unico.md)).
@@ -11,11 +12,11 @@ pasta passada ao `go tool task install` (sem pasta padrão).
 - NÃO usar: módulo de terceiros no código do `claude-tools` (o `go.mod` só tem as dependências `// indirect` da diretiva `tool` do Task); mudar isso exige ADR nova.
 
 ## Comandos
-- Build: `go tool task build` (gera `bin/claude-tools-<VERSION>.exe`, com a versão do arquivo `VERSION`)
-- Release: versão em `VERSION` · anexos: `go tool task build` → `bin/claude-tools-<versão>.exe`
+- Build: `go tool task build` (gera `bin/claude-tools-<VERSION>.exe` no Windows e `bin/claude-tools-<VERSION>` no Linux, com a versão do arquivo `VERSION`)
+- Release: versão em `VERSION` · anexos: `go tool task build:all` → `bin/claude-tools-<versão>-windows-amd64.exe` e `bin/claude-tools-<versão>-linux-amd64`
 - Testes: `go tool task test` (`go test ./...`)
 - Lint: `go tool task lint` (`go vet ./...` e falha se `gofmt -l .` listar algum arquivo)
-- Instalar: `go tool task install DIR=<pasta>` (build + `scripts/install.ps1 -Root <pasta>`: cópia versionada, junction `current` e `PATH` do usuário)
+- Instalar: `go tool task install DIR=<pasta>` (build + instalador do sistema: no Windows, `scripts/install.ps1 -Root <pasta>` — cópia versionada, junction `current` e `PATH` do usuário; no Linux, `scripts/install.sh --root <pasta>` — cópia versionada, link simbólico `current` e linha `export PATH` no `~/.profile`)
 
 ## Convenções
 - A home do usuário só é lida em `cmd/claude-tools/main.go`; `cli.Run` e `account.Store` a
@@ -32,7 +33,7 @@ pasta passada ao `go tool task install` (sem pasta padrão).
 ## Onde coisas novas vão
 - Comando novo do CLI → `internal/cli/cli.go` (parse e mensagens) + operação no pacote de domínio.
 - Operação sobre contas → método de `account.Store` em `internal/account/store.go`.
-- Teste → `<arquivo>_test.go` ao lado do código; o do instalador em `scripts/install_test.go`.
+- Teste → `<arquivo>_test.go` ao lado do código; os dos instaladores em `scripts/install_windows_test.go` e `scripts/install_linux_test.go`.
 
 ## Arquitetura
 - Camadas `cmd/claude-tools → internal/cli → internal/account → arquivos na home`: ver

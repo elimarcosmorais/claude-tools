@@ -1,2 +1,5 @@
 # O gofmt exige LF; sem isto o core.autocrlf=true do Windows deixa os .go em CRLF e o lint reprova.
 *.go text eol=lf
+# O sh do Linux não aceita script em CRLF (o \r entra nos comandos), e o install.sh roda no WSL
+# a partir do mesmo checkout do Windows.
+*.sh text eol=lf

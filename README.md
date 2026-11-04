@@ -1,6 +1,6 @@
 # claude-tools
 
-> CLI para Windows que guarda vários logins do Claude Code com um nome e alterna entre eles com um comando.
+> CLI para Windows e Linux (WSL2) que guarda vários logins do Claude Code com um nome e alterna entre eles com um comando.
 
 ## Sobre
 
@@ -19,9 +19,13 @@ ficam em `~/.claude/accounts/`.
 
 ## Pré-requisitos
 
-- Windows
-- [Go](https://go.dev) 1.27+
-- PowerShell 7+ (`pwsh`), usado pelo instalador
+- Windows, ou Linux no WSL2
+- [Go](https://go.dev) 1.27+ (no WSL, o Go do Linux)
+- No Windows, PowerShell 7+ (`pwsh`), usado pelo instalador; no Linux, só o `sh`
+
+No WSL2, o Claude Code (o `claude` no terminal do Linux ou a extensão do VS Code no modo remoto)
+guarda o login na home do Linux, separado do Windows. Para trocar essas contas, instale o
+`claude-tools` também dentro do WSL: cada ambiente tem as suas contas salvas.
 
 ## Build
 
@@ -32,14 +36,28 @@ go tool task build
 ```
 
 O [Task](https://taskfile.dev) não precisa estar instalado: ele é uma ferramenta do `go.mod` e roda
-por `go tool task` (o Go o compila na primeira vez). O `go tool task build` compila o executável em `bin\claude-tools-<VERSION>.exe`, com a versão do arquivo `VERSION` no nome (o `bin\` fica fora do git). Dá
-para usá-lo direto dali, sem instalar:
+por `go tool task` (o Go o compila na primeira vez). O `go tool task build` compila o executável do
+sistema em que roda, com a versão do arquivo `VERSION` no nome (o `bin/` fica fora do git):
+`bin\claude-tools-<VERSION>.exe` no Windows e `bin/claude-tools-<VERSION>` no Linux. Dá para
+usá-lo direto dali, sem instalar:
 
 ```powershell
 bin\claude-tools-0.1.0.exe help
 ```
 
-## Instalação
+```sh
+bin/claude-tools-0.1.0 help
+```
+
+Para gerar os executáveis dos dois sistemas de uma vez (os anexos da release), em qualquer um
+deles:
+
+```sh
+go tool task build:all
+# bin/claude-tools-<VERSION>-windows-amd64.exe e bin/claude-tools-<VERSION>-linux-amd64
+```
+
+## Instalação no Windows
 
 ```powershell
 go tool task install DIR=C:\dev\programs\claude-tools
@@ -61,6 +79,29 @@ go tool task install DIR=D:\tools\claude-tools -- -SkipPath
 ```
 
 Abra um terminal novo depois da instalação para pegar o `PATH` atualizado.
+
+## Instalação no Linux (WSL2)
+
+No terminal do WSL, dentro do repositório (pode ser o mesmo clone do Windows, por `/mnt/c/...`):
+
+```sh
+go tool task install DIR=$HOME/programs/claude-tools
+```
+
+O `go tool task install DIR=<pasta>` roda o `build` e depois o `scripts/install.sh`, que:
+
+1. copia o executável para `<pasta>/claude-tools-v<VERSION>/claude-tools`;
+2. aponta o link simbólico `<pasta>/current` para essa versão;
+3. acrescenta ao `~/.profile`, se ainda não estiver lá, a linha
+   `export PATH="<pasta>/current:$PATH"` (com o comentário `# claude-tools` antes).
+
+Rodar de novo dá o mesmo resultado. Para instalar sem mexer no `~/.profile`:
+
+```sh
+go tool task install DIR=$HOME/programs/claude-tools -- --skip-path
+```
+
+Abra um terminal novo do WSL depois da instalação para pegar o `PATH` atualizado.
 
 ## Uso
 

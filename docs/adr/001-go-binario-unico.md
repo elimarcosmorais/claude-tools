@@ -11,21 +11,22 @@ status: aceito
 
 ## Contexto
 
-O `claude-tools` é um CLI de Windows que vai para o `PATH` do usuário e precisa rodar em
+O `claude-tools` é um CLI (de Windows e, no WSL2, de Linux: [ADR 003](003-windows-e-linux-do-mesmo-codigo.md)) que vai para o `PATH` do usuário e precisa rodar em
 qualquer terminal sem pedir a instalação de um runtime. A ferramenta que ele substitui era um
 script Python, que exigia o Python instalado. O CLI é pequeno (cinco comandos que leem e gravam
 arquivos JSON) e precisa abrir rápido, porque roda a cada troca de conta.
 
 ## Decisão
 
-Escrever o `claude-tools` em Go (1.27, em `C:\dev\programs\go\current`) usando só a biblioteca
-padrão, compilado num executável único `claude-tools.exe` (`go build ./cmd/claude-tools`).
+Escrever o `claude-tools` em Go (1.27; no Windows, em `C:\dev\programs\go\current`) usando só a
+biblioteca padrão, compilado num executável único por sistema (`go build ./cmd/claude-tools`):
+`claude-tools.exe` no Windows e `claude-tools` no Linux ([ADR 003](003-windows-e-linux-do-mesmo-codigo.md)).
 
 ## Consequências
 
 **Ganhos:**
 
-- Um `.exe` só, sem runtime nem dependência para instalar: copiar o arquivo basta.
+- Um executável só por sistema, sem runtime nem dependência para instalar: copiar o arquivo basta.
 - Abre rápido e tem tamanho pequeno.
 - Teste, formatação e análise estática já vêm com o toolchain (`go test`, `gofmt`, `go vet`).
 - Sem módulos de terceiros no código, não há dependência para atualizar nem auditar. (O `go.mod`

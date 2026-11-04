@@ -1,15 +1,23 @@
 version: '3'
 
 vars:
-  # A versão vem do arquivo VERSION (única fonte) e entra no nome do executável.
+  # A versão vem do arquivo VERSION (única fonte) e entra no nome do executável. É lida
+  # pelo próprio interpretador do Task (read e printf embutidos), sem depender de pwsh nem
+  # de cat no PATH, e o \r sai porque o checkout do Windows pode deixar o VERSION em CRLF.
   VERSION:
-    sh: pwsh -NoProfile -Command "(Get-Content -LiteralPath VERSION -Raw).Trim()"
+    sh: read -r v < VERSION; printf '%s' "${v%$'\r'}"
 
 tasks:
   build:
-    desc: 'Compila bin/claude-tools-<VERSION>.exe (ex.: bin/claude-tools-0.1.0.exe)'
+    desc: 'Compila bin/claude-tools-<VERSION>, com .exe no Windows (ex.: bin/claude-tools-0.1.0.exe)'
     cmds:
-      - go build -o bin/claude-tools-{{.VERSION}}.exe ./cmd/claude-tools
+      - go build -o bin/claude-tools-{{.VERSION}}{{exeExt}} ./cmd/claude-tools
+
+  build:all:
+    desc: 'Compila os anexos da release: bin/claude-tools-<VERSION>-windows-amd64.exe e bin/claude-tools-<VERSION>-linux-amd64'
+    cmds:
+      - GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -o bin/claude-tools-{{.VERSION}}-windows-amd64.exe ./cmd/claude-tools
+      - GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o bin/claude-tools-{{.VERSION}}-linux-amd64 ./cmd/claude-tools
 
   test:
     desc: Roda os testes
@@ -29,14 +37,18 @@ tasks:
         fi
 
   install:
-    desc: 'Instala o claude-tools.exe na pasta informada e o põe no PATH do usuário (go tool task install DIR=<pasta>)'
+    desc: 'Instala o claude-tools na pasta informada e o põe no PATH do usuário (go tool task install DIR=<pasta>)'
     # A pasta vem na variável DIR: o Task recusa flag que não é dele (--path) e lê
     # argumento solto como nome de tarefa. A conferência vem antes do build: deps
     # rodariam antes das preconditions. O default "" é porque, sem DIR, o shellQuote
     # recebe nil e o Task quebra ao montar os templates, antes da precondition.
+    # Um instalador por sistema: install.ps1 no Windows, install.sh no Linux.
     preconditions:
       - sh: test -n {{shellQuote (default "" .DIR)}}
-        msg: 'Informe a pasta de instalação: go tool task install DIR=<pasta>  (ex.: go tool task install DIR=C:\dev\programs\claude-tools)'
+        msg: 'Informe a pasta de instalação: go tool task install DIR=<pasta>  (ex.: no Windows, go tool task install DIR=C:\dev\programs\claude-tools; no Linux, go tool task install DIR=$HOME/programs/claude-tools)'
     cmds:
       - task: build
-      - pwsh -NoProfile -File scripts/install.ps1 -Root {{shellQuote (default "" .DIR)}} {{.CLI_ARGS}}
+      - cmd: pwsh -NoProfile -File scripts/install.ps1 -Root {{shellQuote (default "" .DIR)}} {{.CLI_ARGS}}
+        platforms: [windows]
+      - cmd: sh scripts/install.sh --root {{shellQuote (default "" .DIR)}} {{.CLI_ARGS}}
+        platforms: [linux]
