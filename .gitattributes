@@ -1,0 +1,2 @@
+# O gofmt exige LF; sem isto o core.autocrlf=true do Windows deixa os .go em CRLF e o lint reprova.
+*.go text eol=lf
