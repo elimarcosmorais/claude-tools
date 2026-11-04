@@ -4,6 +4,14 @@ Todas as mudanças relevantes deste projeto ficam neste arquivo.
 O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/), e o projeto usa
 [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [0.2.0] - 2026-11-04
+
+### Adicionado
+
+- adiciona suporte a Linux/WSL2 com binário e instalador próprios (12f1bc1)
+
+[0.2.0]: https://github.com/elimarcosmorais/claude-tools/compare/v0.1.0...v0.2.0
+
 ## [0.1.0] - 2026-10-17
 
 ### Incompatível
